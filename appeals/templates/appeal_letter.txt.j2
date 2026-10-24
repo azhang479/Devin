@@ -21,6 +21,11 @@ We request reprocessing of claim {{ denial.claim_id }}. The clinical documentati
 {% for item in triage.evidence.matched %}
 - {{ item.description }}: “{{ item.snippet }}”
 {% endfor %}
+{% if argument %}
+
+{{ argument }}
+
+{% endif %}
 
 Please review the enclosed documentation and reprocess this claim. Thank you for your consideration.
 

@@ -44,6 +44,8 @@ class EvidenceResult(BaseModel):
     missing: list[str] = Field(default_factory=list)
     missing_details: list[CriterionEvidence] = Field(default_factory=list)
     meets_min: bool = False
+    method: str = "keyword"
+    rejected_quotes: list[str] = Field(default_factory=list)
 
 
 class TriageResult(BaseModel):

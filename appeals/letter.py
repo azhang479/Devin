@@ -20,6 +20,7 @@ def render_letter(
     triage_result: TriageResult,
     payer: PayerRules,
     policy: Policy | None = None,
+    argument: str | None = None,
 ) -> str | None:
     if triage_result.action != "appeal":
         return None
@@ -30,5 +31,6 @@ def render_letter(
         triage=triage_result,
         payer=payer,
         policy=policy,
+        argument=argument,
         carc_description=lookup_carc(triage_result.carc, load_carc_table())["description"],
     )

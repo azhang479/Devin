@@ -1,0 +1,144 @@
+{
+  "models": {
+    "qwen2.5:3b": {
+      "cases": 6,
+      "fields_correct": 48,
+      "fields_total": 54,
+      "cases_fully_correct": 0,
+      "action_matches": 6,
+      "mean_seconds_per_case": 14.134875043999727,
+      "per_case": [
+        {
+          "id": "CASE-001",
+          "fields_correct": 8,
+          "fields_total": 9,
+          "fully_correct": false,
+          "expected_action": "resubmit",
+          "actual_action": "resubmit",
+          "action_match": true,
+          "error": null
+        },
+        {
+          "id": "CASE-005",
+          "fields_correct": 8,
+          "fields_total": 9,
+          "fully_correct": false,
+          "expected_action": "appeal",
+          "actual_action": "appeal",
+          "action_match": true,
+          "error": null
+        },
+        {
+          "id": "CASE-007",
+          "fields_correct": 8,
+          "fields_total": 9,
+          "fully_correct": false,
+          "expected_action": "appeal",
+          "actual_action": "appeal",
+          "action_match": true,
+          "error": null
+        },
+        {
+          "id": "CASE-010",
+          "fields_correct": 8,
+          "fields_total": 9,
+          "fully_correct": false,
+          "expected_action": "appeal",
+          "actual_action": "appeal",
+          "action_match": true,
+          "error": null
+        },
+        {
+          "id": "CASE-013",
+          "fields_correct": 8,
+          "fields_total": 9,
+          "fully_correct": false,
+          "expected_action": "bill_patient",
+          "actual_action": "bill_patient",
+          "action_match": true,
+          "error": null
+        },
+        {
+          "id": "CASE-020",
+          "fields_correct": 8,
+          "fields_total": 9,
+          "fully_correct": false,
+          "expected_action": "appeal",
+          "actual_action": "appeal",
+          "action_match": true,
+          "error": null
+        }
+      ]
+    },
+    "qwen2.5:7b": {
+      "cases": 6,
+      "fields_correct": 50,
+      "fields_total": 54,
+      "cases_fully_correct": 3,
+      "action_matches": 5,
+      "mean_seconds_per_case": 20.00893286499998,
+      "per_case": [
+        {
+          "id": "CASE-001",
+          "fields_correct": 9,
+          "fields_total": 9,
+          "fully_correct": true,
+          "expected_action": "resubmit",
+          "actual_action": "resubmit",
+          "action_match": true,
+          "error": null
+        },
+        {
+          "id": "CASE-005",
+          "fields_correct": 9,
+          "fields_total": 9,
+          "fully_correct": true,
+          "expected_action": "appeal",
+          "actual_action": "appeal",
+          "action_match": true,
+          "error": null
+        },
+        {
+          "id": "CASE-007",
+          "fields_correct": 8,
+          "fields_total": 9,
+          "fully_correct": false,
+          "expected_action": "appeal",
+          "actual_action": "appeal",
+          "action_match": true,
+          "error": null
+        },
+        {
+          "id": "CASE-010",
+          "fields_correct": 9,
+          "fields_total": 9,
+          "fully_correct": true,
+          "expected_action": "appeal",
+          "actual_action": "appeal",
+          "action_match": true,
+          "error": null
+        },
+        {
+          "id": "CASE-013",
+          "fields_correct": 7,
+          "fields_total": 9,
+          "fully_correct": false,
+          "expected_action": "bill_patient",
+          "actual_action": "gather_documentation",
+          "action_match": false,
+          "error": null
+        },
+        {
+          "id": "CASE-020",
+          "fields_correct": 8,
+          "fields_total": 9,
+          "fully_correct": false,
+          "expected_action": "appeal",
+          "actual_action": "appeal",
+          "action_match": true,
+          "error": null
+        }
+      ]
+    }
+  }
+}
