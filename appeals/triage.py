@@ -1,6 +1,8 @@
+from collections.abc import Callable
 from datetime import date, timedelta
 
 from appeals.carc import lookup_carc
+from appeals.evidence import match_criteria
 from appeals.models import Denial, EvidenceResult, TriageResult
 from appeals.rules import PayerRules, Policy
 
@@ -33,6 +35,8 @@ def triage(
     auth_number: str | None = None,
     proof_of_timely_filing: bool = False,
     today: date | None = None,
+    *,
+    evidence_matcher: Callable[[str, Policy], EvidenceResult] | None = None,
 ) -> TriageResult:
     today = today or date.today()
     adjustment = _primary_adjustment(denial)
@@ -41,9 +45,7 @@ def triage(
     policy = _policy_for(denial, payer)
     evidence = EvidenceResult()
     if category == "medical_necessity" and policy is not None:
-        from appeals.evidence import match_criteria
-
-        evidence = match_criteria(note_text, policy)
+        evidence = (evidence_matcher or match_criteria)(note_text, policy)
 
     remit_date = denial.remit_date or today
     deadline = remit_date + timedelta(days=payer.appeal.deadline_days)

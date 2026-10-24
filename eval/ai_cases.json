@@ -1,0 +1,101 @@
+{
+  "description": "Hand-authored synthetic medical-necessity notes for comparing keyword vs. local-LLM evidence matching. Notes deliberately use paraphrases, abbreviations, and negations. Every case is a CO-50 denial with remit date 2026-10-01, so no deadline has passed on 2026-10-24.",
+  "cases": [
+    {
+      "id": "AI-01",
+      "payer_id": "acme",
+      "cpt": "72148",
+      "note": "Lumbar radicular pain down the left leg. Completed a 2-month course of PT plus NSAIDs without relief. Exam shows a diminished left ankle reflex and decreased sensation over the L5 dermatome.",
+      "expected_met": ["conservative_therapy", "neuro_deficit"],
+      "expected_action": "appeal"
+    },
+    {
+      "id": "AI-02",
+      "payer_id": "summit",
+      "cpt": "72148",
+      "note": "Back pain for 3 weeks with no prior treatment tried. Patient denies numbness, tingling, or weakness in the legs. Neurologic exam is normal.",
+      "expected_met": [],
+      "expected_action": "gather_documentation"
+    },
+    {
+      "id": "AI-03",
+      "payer_id": "blueriver",
+      "cpt": "72148",
+      "note": "Eight weeks of supervised PT and a home stretching routine failed to improve sciatica. New left foot dorsiflexion weakness, graded 4/5. MRI ordered to evaluate candidacy for an epidural steroid injection.",
+      "expected_met": ["conservative_therapy", "neuro_deficit", "imaging_plan"],
+      "expected_action": "appeal"
+    },
+    {
+      "id": "AI-04",
+      "payer_id": "acme",
+      "cpt": "29881",
+      "note": "Right knee gives way and gets stuck mid-flexion several times a week, with tenderness along the medial joint line. Tried ibuprofen and a 6-week PT program without improvement.",
+      "expected_met": ["mechanical_symptoms", "conservative_care"],
+      "expected_action": "appeal"
+    },
+    {
+      "id": "AI-05",
+      "payer_id": "blueriver",
+      "cpt": "29881",
+      "note": "Knee pain after a twisting injury last week. No locking or catching reported. Has not yet tried physical therapy or anti-inflammatory medication. MRI pending.",
+      "expected_met": [],
+      "expected_action": "gather_documentation"
+    },
+    {
+      "id": "AI-06",
+      "payer_id": "summit",
+      "cpt": "95810",
+      "note": "Wife reports loud nightly snoring and episodes where he stops breathing during sleep. He has fallen asleep while driving. BMI 38, on lisinopril for elevated blood pressure. STOP-BANG score 6/8.",
+      "expected_met": ["sleep_symptoms", "risk_factors", "prior_screening"],
+      "expected_action": "appeal"
+    },
+    {
+      "id": "AI-07",
+      "payer_id": "acme",
+      "cpt": "95810",
+      "note": "Routine visit. Patient sleeps well and denies snoring or daytime sleepiness. Normotensive, BMI 23. Sleep study requested per patient preference.",
+      "expected_met": [],
+      "expected_action": "gather_documentation"
+    },
+    {
+      "id": "AI-08",
+      "payer_id": "blueriver",
+      "cpt": "97110",
+      "note": "Cannot climb stairs without a rail and walks less than one block because of hip pain. Therapist advanced resistance band load from yellow to green this session. Timed up-and-go improved from 18 to 12 seconds.",
+      "expected_met": ["functional_limit", "skilled_progression", "measurable_progress"],
+      "expected_action": "appeal"
+    },
+    {
+      "id": "AI-09",
+      "payer_id": "summit",
+      "cpt": "97110",
+      "note": "Patient tolerated the session. Exercises unchanged from last visit.",
+      "expected_met": [],
+      "expected_action": "gather_documentation"
+    },
+    {
+      "id": "AI-10",
+      "payer_id": "acme",
+      "cpt": "72148",
+      "note": "Six weeks of physical therapy failed. Progressive left leg weakness and numbness.",
+      "expected_met": ["conservative_therapy", "neuro_deficit"],
+      "expected_action": "appeal"
+    },
+    {
+      "id": "AI-11",
+      "payer_id": "acme",
+      "cpt": "97110",
+      "note": "Shoulder abduction limited to 90 degrees, which prevents overhead reaching. Home program reviewed.",
+      "expected_met": ["functional_limit"],
+      "expected_action": "gather_documentation"
+    },
+    {
+      "id": "AI-12",
+      "payer_id": "blueriver",
+      "cpt": "72148",
+      "note": "Chronic low back pain; patient would like imaging. No physical therapy completed yet and plans to start PT next week. No weakness on exam.",
+      "expected_met": [],
+      "expected_action": "gather_documentation"
+    }
+  ]
+}

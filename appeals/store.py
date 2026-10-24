@@ -15,6 +15,12 @@ class DenialRecord:
     triage: TriageResult
     letter: str | None
     status: str = "pending"
+    doc_request: str | None = None
+    doc_request_method: str = "none"
+    analysis_method: str = "keyword"
+    ai_error: str | None = None
+    ai_argument: bool = False
+    source: str = "835"
 
 
 class InMemoryStore:
