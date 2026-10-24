@@ -25,7 +25,7 @@ from appeals.triage import triage
 
 ROOT = Path(__file__).resolve().parent.parent
 STATIC_DIR = Path(__file__).resolve().parent / "static"
-app = FastAPI(title="Appeals Copilot", description="Synthetic claim-denial decision support.")
+app = FastAPI(title="Stella", description="Synthetic claim-denial decision support.")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 store = InMemoryStore()
 payer_rules: dict[str, PayerRules] = {}

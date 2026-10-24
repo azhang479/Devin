@@ -1,1 +1,1 @@
-"""Appeals Copilot service."""
+"""Stella: Denial Evaluation & Value Intelligence Navigator."""
