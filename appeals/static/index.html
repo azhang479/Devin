@@ -68,6 +68,19 @@
   .toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:#111a2e; color:#fff; padding:8px 16px; border-radius:6px; opacity:0; transition:opacity .2s; }
   .toast.show { opacity:1; }
   footer { padding:0 24px 18px; color:var(--muted); font-size:12px; }
+  .ai-pill { font-size:12px; padding:3px 10px; border-radius:12px; background:#ffffff14; display:flex; align-items:center; gap:6px; }
+  .ai-pill i { width:8px; height:8px; border-radius:50%; background:#868e96; display:inline-block; }
+  .ai-pill.on i { background:#51cf66; } .ai-pill.down i { background:#ff922b; }
+  .chip { display:inline-block; font-size:10.5px; font-weight:650; padding:1px 6px; border-radius:8px; border:1px solid var(--line); color:var(--muted); background:#fff; margin-left:4px; vertical-align:middle; }
+  .chip.ai { color:#5f3dc4; border-color:#d0bfff; background:#f3f0ff; }
+  .chip.warn { color:#d9480f; border-color:#ffd8a8; background:#fff4e6; }
+  .sechead { display:flex; align-items:center; gap:8px; margin:14px 0 6px; }
+  .sechead h3 { margin:0; }
+  .sechead .btn { margin-left:auto; padding:3px 10px; font-size:12px; }
+  .btn.ai { background:#7048e8; border-color:#7048e8; color:#fff; }
+  .notice { font-size:12px; color:var(--muted); margin:4px 0 8px; }
+  .notice.warn { color:#d9480f; }
+  pre.docreq { white-space:pre-wrap; background:#fff9db; border:1px solid #ffe066; border-radius:6px; padding:10px 12px; font-family:inherit; font-size:13px; line-height:1.45; margin:0; }
 </style>
 </head>
 <body>
@@ -75,7 +88,8 @@
   <h1>Appeals Copilot</h1>
   <span class="tag">Synthetic data · decision support only</span>
   <span class="spacer"></span>
-  <button id="uploadBtn">Upload remittance</button>
+  <span class="ai-pill" id="aiPill" title="Local LLM status"><i></i><span>AI off</span></span>
+  <button id="uploadBtn">Upload denial</button>
 </header>
 <main>
   <section class="stats" id="stats"></section>
@@ -106,7 +120,7 @@
 <dialog id="dlg">
   <form method="dialog" id="upForm">
     <h2>Upload a denial</h2>
-    <label>835 remittance file <input type="file" name="remit" required></label>
+    <label>835 remittance, or a PDF EOB (PDFs need local AI) <input type="file" name="remit" accept=".835,.txt,.edi,.pdf,application/pdf" required></label>
     <label>Clinical note <textarea name="note" placeholder="Paste the relevant clinical note…"></textarea></label>
     <label>Authorization number (optional) <input type="text" name="auth_number"></label>
     <label style="display:flex;align-items:center;gap:6px;color:var(--ink)"><input type="checkbox" name="proof_of_timely_filing"> Proof of timely filing on file</label>
@@ -121,10 +135,28 @@ const money = n => (n ?? 0).toLocaleString("en-US", {style:"currency", currency:
 const pct = n => Math.round((n ?? 0) * 100) + "%";
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const label = a => String(a || "").replace(/_/g, " ");
-let queue = [], selected = null;
+let queue = [], selected = null, ai = {enabled:false, model:null, reachable:false};
+const methodChip = m => m === "ai" ? '<span class="chip ai" title="Evidence matched by the local LLM; quotes verified against the note">AI</span>'
+  : m === "keyword_fallback" ? '<span class="chip warn" title="AI failed; keyword matching used">AI failed</span>' : "";
+const sourceChip = s => s === "eob_pdf" ? '<span class="chip" title="Extracted from a PDF EOB by the local LLM">PDF</span>' : "";
+
+async function loadAiStatus() {
+  try { ai = await api("/api/ai/status"); } catch { ai = {enabled:false}; }
+  const pill = $("#aiPill");
+  pill.className = "ai-pill" + (ai.enabled ? (ai.reachable ? " on" : " down") : "");
+  pill.querySelector("span").textContent = ai.enabled ? `Local AI: ${ai.model}${ai.reachable ? "" : " (unreachable)"}` : "AI off";
+}
 
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2200); }
-async function api(path, opts) { const r = await fetch(path, opts); if (!r.ok) throw new Error(path + " → " + r.status); return r.headers.get("content-type")?.includes("json") ? r.json() : r.text(); }
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  if (!r.ok) {
+    let msg = String(r.status);
+    try { const b = await r.json(); const det = b.detail; msg = typeof det === "string" ? det : det?.errors ? det.errors.join("; ") : JSON.stringify(det); } catch {}
+    throw new Error(msg);
+  }
+  return r.headers.get("content-type")?.includes("json") ? r.json() : r.text();
+}
 
 async function loadStats() {
   const s = await api("/api/stats");
@@ -156,7 +188,7 @@ function renderQueue() {
       <td>${esc(q.patient)}${q.status === "approved" ? ' <span class="st-approved">✓</span>' : ""}</td>
       <td>${esc((q.payer_name || q.payer || "").replace(/ \(synthetic\)$/, ""))}</td><td>${esc(q.cpt)}</td>
       <td><span title="${esc(q.category)}">${esc(q.carc)}</span> <span class="muted">${esc(label(q.category))}</span></td>
-      <td><span class="badge a-${esc(q.action)}">${esc(label(q.action))}</span></td>
+      <td><span class="badge a-${esc(q.action)}">${esc(label(q.action))}</span>${methodChip(q.analysis_method)}${sourceChip(q.source)}</td>
       <td class="num">${money(q.amount_at_stake)}</td>
       <td class="num ${dcls}">${dl < 0 ? "passed" : dl}</td>
       <td>${win ? pct(win) + `<span class="bar"><i style="width:${win * 100}%"></i></span>` : '<span class="muted">—</span>'}</td>
@@ -176,8 +208,15 @@ function evidenceList(ev) {
   };
   const matched = ev.matched || [], missing = (ev.missing_details && ev.missing_details.length ? ev.missing_details : ev.missing) || [];
   if (!matched.length && !missing.length) return '<p class="muted">No policy criteria apply to this denial type.</p>';
+  const rejected = ev.rejected_quotes || [];
   return `<ul class="ev">${matched.map(m => item(m, true)).join("")}${missing.map(m => item(m, false)).join("")}</ul>
-    <p class="muted" style="margin:6px 0 0">${ev.meets_min ? "Meets" : "Does not meet"} the policy's minimum criteria.</p>`;
+    <p class="muted" style="margin:6px 0 0">${ev.meets_min ? "Meets" : "Does not meet"} the policy's minimum criteria.</p>
+    ${rejected.length ? `<p class="notice warn" title="${esc(rejected.join(" | "))}">${rejected.length} AI quote${rejected.length === 1 ? " was" : "s were"} discarded because ${rejected.length === 1 ? "it isn't" : "they aren't"} in the note word for word.</p>` : ""}`;
+}
+
+function evidenceMethod(d, t) {
+  if (!(t.evidence?.matched?.length || t.evidence?.missing?.length)) return "";
+  return d.analysis_method === "ai" ? '<span class="chip ai">AI · quotes verified</span>' : '<span class="chip">keyword match</span>';
 }
 
 async function showDetail(id) {
@@ -197,15 +236,34 @@ async function showDetail(id) {
       <div>Appeal deadline</div><div>${esc(t.deadline)} <span class="${t.days_left < 0 ? "late" : t.days_left <= 14 ? "soon" : "muted"}">(${t.days_left < 0 ? "passed" : t.days_left + " days left"})</span></div>
       <div>Win probability</div><div>${t.win_probability ? pct(t.win_probability) : "—"}</div>
       <div>Policy</div><div>${esc(t.policy_id || "—")}</div>
+      <div>Source</div><div>${d.source === "eob_pdf" ? 'PDF EOB <span class="chip ai">AI-extracted</span> <span class="muted">check the fields against the PDF</span>' : "835 remittance"}</div>
     </div>
-    <h3>Policy criteria vs. clinical note</h3>${evidenceList(t.evidence)}
+    <div class="sechead"><h3>Policy criteria vs. clinical note</h3>${evidenceMethod(d, t)}
+      ${ai.enabled && t.category === "medical_necessity" ? `<button class="btn ai" id="aiBtn">${d.analysis_method === "ai" ? "Re-run AI review" : "Run AI review"}</button>` : ""}</div>
+    ${d.analysis_method === "keyword_fallback" ? `<p class="notice warn">AI review failed (${esc(d.ai_error || "error")}); showing keyword matches.</p>` : ""}
+    ${evidenceList(t.evidence)}
+    ${d.doc_request ? `<div class="sechead"><h3>Documentation request to clinician</h3>${d.doc_request_method === "ai" ? '<span class="chip ai">AI drafted</span>' : '<span class="chip">template</span>'}
+      <button class="btn" id="copyDoc">Copy</button></div><pre class="docreq">${esc(d.doc_request)}</pre>` : ""}
     <h3>Clinical note</h3><pre class="note">${esc(d.note || d.note_text || "")}</pre>
     ${d.letter ? `<h3>Draft appeal letter</h3>
+      ${d.ai_argument ? '<p class="notice"><span class="chip ai">AI</span> Includes an AI-drafted argument paragraph. Its quotes were checked against the note; the rest still needs review.</p>' : ""}
       <div class="actions">
         <button class="btn primary" id="approveBtn" ${approved ? "disabled" : ""}>${approved ? "Approved ✓" : "Approve letter"}</button>
         <a class="btn" href="/api/denials/${encodeURIComponent(id)}/letter.txt" download="appeal-${esc(id)}.txt">Download .txt</a>
       </div><pre class="letter">${esc(d.letter)}</pre>` : ""}`;
   const ab = $("#approveBtn");
+  const cb = $("#copyDoc");
+  if (cb) cb.onclick = async () => { await navigator.clipboard.writeText(d.doc_request); toast("Copied documentation request"); };
+  const aib = $("#aiBtn");
+  if (aib) aib.onclick = async () => {
+    aib.disabled = true; aib.textContent = "Running local model…";
+    try {
+      await api(`/api/denials/${encodeURIComponent(id)}/ai-review`, {method:"POST"});
+      toast("AI review complete");
+      await Promise.all([loadQueue(), loadStats()]);
+    } catch (err) { toast("AI review failed: " + err.message); }
+    showDetail(id);
+  };
   if (ab) ab.onclick = async () => { await api(`/api/denials/${encodeURIComponent(id)}/approve`, {method:"POST"}); toast("Letter approved"); await loadQueue(); showDetail(id); };
 }
 
@@ -215,22 +273,26 @@ $("#uploadBtn").onclick = () => $("#dlg").showModal();
 $("#upForm").addEventListener("submit", async e => {
   if (e.submitter?.value !== "ok") return;
   e.preventDefault();
-  const f = e.target, fd = new FormData();
-  fd.append("remit", f.remit.files[0]);
+  const f = e.target, fd = new FormData(), file = f.remit.files[0];
+  const isPdf = /\.pdf$/i.test(file.name) || file.type === "application/pdf";
+  if (isPdf && !ai.enabled) { toast("PDF EOBs need local AI (set APPEALS_AI=ollama)"); return; }
+  fd.append(isPdf ? "eob" : "remit", file);
   fd.append("note", f.note.value);
   if (f.auth_number.value) fd.append("auth_number", f.auth_number.value);
   fd.append("proof_of_timely_filing", f.proof_of_timely_filing.checked ? "true" : "false");
   try {
-    const res = await api("/api/denials", {method:"POST", body:fd});
+    $("#upSubmit").disabled = true; $("#upSubmit").textContent = isPdf ? "Extracting…" : "Triaging…";
+    const res = await api(isPdf ? "/api/eobs" : "/api/denials", {method:"POST", body:fd});
     $("#dlg").close(); f.reset();
     const ids = res.ids || res;
     toast(`Triaged ${ids.length} claim${ids.length === 1 ? "" : "s"}`);
     await Promise.all([loadQueue(), loadStats()]);
     if (ids[0]) showDetail(ids[0]);
   } catch (err) { toast("Upload failed: " + err.message); }
+  finally { $("#upSubmit").disabled = false; $("#upSubmit").textContent = "Triage"; }
 });
 
-Promise.all([loadStats(), loadQueue()]).then(() => { if (queue[0]) showDetail(queue[0].id); }).catch(e => toast(e.message));
+Promise.all([loadAiStatus(), loadStats(), loadQueue()]).then(() => { if (queue[0]) showDetail(queue[0].id); }).catch(e => toast(e.message));
 </script>
 </body>
 </html>
