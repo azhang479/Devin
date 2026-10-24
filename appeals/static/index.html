@@ -94,7 +94,7 @@ footer{padding:0 24px 10px;color:var(--muted);font-size:11.5px}
   <div class="seg" id="sortSeg"><button data-s="priority" class="on">Priority</button><button data-s="days_left">Deadline</button><button data-s="amount_at_stake">Amount</button></div>
   <span class="sp"></span><span class="muted" style="font-size:12px">Click or drag a card to open it · #1–#3 = top priority in each column</span>
 </div>
-<div class="board" id="board"></div>
+<div class="board" id="queue"></div>
 <footer>All payers, policies, and patients are fictional. A clinician or biller reviews and approves every letter before submission. Columns reflect the deterministic triage decision; AI never changes amounts or deadlines.</footer>
 
 <div class="scrim" id="scrim"></div>
@@ -124,7 +124,7 @@ async function loadAi(){try{ai=await api("/api/ai/status")}catch{ai={enabled:fal
 function passes(x){const s=q.toLowerCase();return(!payer||x.payer_name===payer)&&(!s||[x.patient,x.cpt,x.carc,x.category,x.payer_name,x.id].join(" ").toLowerCase().includes(s))}
 function render(){
   const maxP=Math.max(...queue.map(x=>x.priority||0),1);
-  $("#board").innerHTML=COLS.map(([a,name,sub])=>{
+  $(".board").innerHTML=COLS.map(([a,name,sub])=>{
     const rows=queue.filter(x=>x.action===a&&passes(x)).sort((x,y)=>sortKey==="days_left"?x.days_left-y.days_left:y[sortKey]-x[sortKey]);
     const sum=rows.reduce((s,x)=>s+x.amount_at_stake,0);
     return `<section class="col" data-col="${a}" style="--c:var(--${a})"><div class="colh"><b>${name}</b><span class="n">${rows.length}</span><span class="sum">${money(sum)}</span></div><div class="colsub">${sub}</div>
