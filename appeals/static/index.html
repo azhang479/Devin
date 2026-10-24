@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stella · Denial Evaluation &amp; Value Intelligence Navigator</title>
+<title>Stella · Your Denial Evaluation &amp; Value Intelligence Navigator (DEVIN)</title>
 <link rel="preload" href="/static/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* Design tokens: shadcn preset bKsFTYqO (style base-luma, base color stone, font Inter, radius 0.45rem) */
@@ -181,7 +181,7 @@ dialog input[type=text]{font-weight:400}
 <body>
 <aside class="side">
   <div class="logo"><svg viewBox="0 0 48 56" width="30" height="35" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--sidebar-primary)"/><stop offset="1" style="stop-color:var(--primary)"/></linearGradient></defs><path d="M24 2 44 9V26C44 40 35 49 24 54 13 49 4 40 4 26V9Z" fill="url(#lg)"/><path d="M31 15C20 17 14.5 25.5 15.5 38.5 26.5 36.5 33 28 31 15Z" style="fill:var(--primary-foreground)"/><path d="M15.5 38.5C19.5 30 23.5 24.5 29 19" style="stroke:var(--primary)" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg>
-    <div><div class="lname">Stella</div><div class="ltag">Your Denial Evaluation &amp; Value Intelligence Navigator</div></div></div>
+    <div><div class="lname">Stella</div><div class="ltag">Your Denial Evaluation &amp; Value Intelligence Navigator (DEVIN)</div></div></div>
   <div class="glabel-side">Workspace</div>
   <nav class="side-nav"><button data-tab="overview" class="on"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Overview</button><button data-tab="queue"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v11"/><path d="M12 5v6"/><path d="M18 5v14"/></svg>Review queue</button><button id="navNew"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>New denial</button></nav>
   <div class="ai" id="aiPill" hidden><span class="mote" id="aiMote"></span><span id="aiText"></span></div>
@@ -347,44 +347,46 @@ function causticCoverflow(root,items,{cardWidth=236,cardHeight=296,start:start0=
   const drawAberration=(i,k)=>{if(!sized)return;const ctx=fxs[i].getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);const alpha=clamp(.18+k/6*.55,0,.85);ctx.lineWidth=1.25;ctx.globalCompositeOperation=dark?"lighter":"source-over";const redV=Math.max(fg.r,190),blueV=Math.max(fg.b,190);
     ctx.save();ctx.translate(-k,0);rrectPath(ctx,1,1,cw-2,ch-2,18);ctx.strokeStyle=`rgba(${redV},0,0,${alpha})`;ctx.stroke();ctx.restore();
     ctx.save();ctx.translate(k,0);rrectPath(ctx,1,1,cw-2,ch-2,18);ctx.strokeStyle=`rgba(0,0,${blueV},${alpha})`;ctx.stroke();ctx.restore();ctx.globalCompositeOperation="source-over"};
+  const wrapD=d=>{d=((d%n)+n)%n;return d>n/2?d-n:d},idx=x=>((Math.round(x)%n)+n)%n;
   let pos=start,prevPos=start,vel=0,effVel=0,mode="idle",springStart=0,springTarget=start,tweenFrom=0,tweenTarget=0,tweenStart=0,tweenDur=250,aberK=0,aberDeadline=0,lastWindow=[],ambient=.5,raf=0,running=false,last=0,lastCaustic=0,intersecting=true,activeShown=-1,dead=false;
-  const applyTransforms=()=>{for(let i=0;i<n;i++){const d=i-pos;cards[i].style.transform=cardTransform(d,spacing);cards[i].style.zIndex=String(200-Math.round(Math.abs(d)*10))}};
-  const syncActive=()=>{const a=Math.round(clamp(pos,0,n-1));if(a===activeShown)return;activeShown=a;dots.forEach((d,i)=>d.dataset.active=i===a?"true":"false");live.textContent=`${items[a]?.title??""}, item ${a+1} of ${n}`;onFocus?.(a)};
+  const applyTransforms=()=>{for(let i=0;i<n;i++){const d=wrapD(i-pos),ad=Math.abs(d);cards[i].style.transform=cardTransform(d,spacing);cards[i].style.zIndex=String(200-Math.round(ad*10));cards[i].style.opacity=ad>n/2-1?String(clamp(n/2-ad,0,1)):"1"}};
+  const norm=()=>{const k=Math.floor(Math.round(pos)/n)*n;if(k){pos-=k;prevPos-=k;springTarget-=k;tweenTarget-=k}};
+  const syncActive=()=>{const a=idx(pos);if(a===activeShown)return;activeShown=a;dots.forEach((d,i)=>d.dataset.active=i===a?"true":"false");live.textContent=`${items[a]?.title??""}, item ${a+1} of ${n}`;onFocus?.(a)};
   const settledNow=()=>mode==="idle"&&aberK<.02;
   const frame=now=>{raf=0;if(dead)return;const dt=Math.min(.05,last===0?1/60:(now-last)/1000);last=now;
-    if(mode==="momentum"){vel*=Math.pow(.92,dt*60);pos+=vel*dt;if(pos<0){pos+=(0-pos)*Math.min(1,dt*10);vel*=.8}else if(pos>n-1){pos+=(n-1-pos)*Math.min(1,dt*10);vel*=.8}if(Math.abs(vel)<.05){mode="spring";springTarget=Math.round(clamp(pos,0,n-1));springStart=now}}
-    else if(mode==="spring"){const kk=170,cc=2*Math.sqrt(kk)*.95;vel+=(-kk*(pos-springTarget)-cc*vel)*dt;pos+=vel*dt;if((Math.abs(pos-springTarget)<.0015&&Math.abs(vel)<.02)||now-springStart>900){pos=springTarget;vel=0;mode="idle"}}
-    else if(mode==="tween"){const t=Math.min(1,(now-tweenStart)/tweenDur);pos=tweenFrom+(tweenTarget-tweenFrom)*easeOutExpo(t);if(t>=1){pos=tweenTarget;mode="idle"}}
+    if(mode==="momentum"){vel*=Math.pow(.92,dt*60);pos+=vel*dt;if(Math.abs(vel)<.05){mode="spring";springTarget=Math.round(pos);springStart=now}}
+    else if(mode==="spring"){const kk=170,cc=2*Math.sqrt(kk)*.95;vel+=(-kk*(pos-springTarget)-cc*vel)*dt;pos+=vel*dt;if((Math.abs(pos-springTarget)<.0015&&Math.abs(vel)<.02)||now-springStart>900){pos=springTarget;vel=0;mode="idle";norm()}}
+    else if(mode==="tween"){const t=Math.min(1,(now-tweenStart)/tweenDur);pos=tweenFrom+(tweenTarget-tweenFrom)*easeOutExpo(t);if(t>=1){pos=tweenTarget;mode="idle";norm()}}
     const posChanged=pos!==prevPos,inst=(pos-prevPos)/Math.max(dt,1e-4);prevPos=pos;effVel+=(inst-effVel)*.4;
     const moving=mode!=="idle"||posChanged;
     if(moving){aberK=Math.min(6,Math.abs(effVel)*35*.04);if(aberK>.05)aberDeadline=now+900}else{aberK*=Math.exp(-dt*10);if(aberK<.03||now>aberDeadline)aberK=0}
     ambient+=((moving?1:.5)-ambient)*Math.min(1,dt*4);
     if(sized){if(moving)applyTransforms();syncActive();const a=activeShown;
-      if(moving||aberK>=.02||now-lastCaustic>=33){lastCaustic=now;const t=now/1000,ws=Math.max(0,a-1),we=Math.min(n-1,a+1);for(const idx of lastWindow)if(idx<ws||idx>we)drawCaustics(idx,t,ambient);lastWindow=[];for(let i=ws;i<=we;i++){drawCaustics(i,t,ambient);lastWindow.push(i)}if(aberK>=.02)drawAberration(a,aberK)}}
+      if(moving||aberK>=.02||now-lastCaustic>=33){lastCaustic=now;const t=now/1000,win=[...new Set([(a-1+n)%n,a,(a+1)%n])];for(const j of lastWindow)if(!win.includes(j))drawCaustics(j,t,ambient);lastWindow=win;for(const j of win)drawCaustics(j,t,ambient);if(aberK>=.02)drawAberration(a,aberK)}}
     if(!intersecting||(settledNow()&&document.hidden)||!root.isConnected){running=false;return}
     raf=requestAnimationFrame(frame)};
   const wake=()=>{if(reduced||running||!intersecting||dead)return;running=true;last=0;raf=requestAnimationFrame(frame)};
-  const navigate=(target,dur)=>{const t=clamp(Math.round(target),0,n-1);if(reduced){pos=t;vel=0;applyTransforms();syncActive();return}tweenFrom=pos;tweenTarget=t;tweenStart=performance.now();tweenDur=dur;mode="tween";wake()};
+  const navigate=(target,dur)=>{const t=Math.round(target);if(reduced){pos=t;vel=0;norm();applyTransforms();syncActive();return}tweenFrom=pos;tweenTarget=t;tweenStart=performance.now();tweenDur=dur;mode="tween";wake()};
   let dragging=false,dragMoved=0,dragTotal=0,lastX=0,lastT=0,dragVel=0;
   stage.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;dragging=true;dragMoved=0;dragTotal=0;lastX=e.clientX;lastT=performance.now();dragVel=0;if(!reduced){mode="drag";vel=0;stage.style.cursor="grabbing";wake()}try{stage.setPointerCapture(e.pointerId)}catch{}});
-  stage.addEventListener("pointermove",e=>{if(!dragging)return;const now=performance.now(),dx=e.clientX-lastX;lastX=e.clientX;dragMoved+=Math.abs(dx);dragTotal+=dx;if(reduced)return;const dtm=Math.max(4,now-lastT)/1000;lastT=now;let next=pos-dx/spacing;if(next<0)next*=.3;else if(next>n-1)next=n-1+(next-(n-1))*.3;dragVel+=((next-pos)/dtm-dragVel)*.35;pos=next});
+  stage.addEventListener("pointermove",e=>{if(!dragging)return;const now=performance.now(),dx=e.clientX-lastX;lastX=e.clientX;dragMoved+=Math.abs(dx);dragTotal+=dx;if(reduced)return;const dtm=Math.max(4,now-lastT)/1000;lastT=now;const next=pos-dx/spacing;dragVel+=((next-pos)/dtm-dragVel)*.35;pos=next});
   stage.addEventListener("pointerup",e=>{if(!dragging)return;dragging=false;stage.style.cursor="grab";try{stage.releasePointerCapture(e.pointerId)}catch{}
     if(dragMoved<5){const rect=stage.getBoundingClientRect(),rel=(e.clientX-rect.left-rect.width/2)/spacing;
-      if(Math.abs(rel)<.5&&Math.abs(pos-Math.round(pos))<.02){mode="idle";onOpen?.(Math.round(pos));return}
+      if(Math.abs(rel)<.5&&Math.abs(pos-Math.round(pos))<.02){mode="idle";onOpen?.(idx(pos));return}
       navigate(pos+rel,300);return}
     if(reduced){if(Math.abs(dragTotal)>30)navigate(Math.round(pos)-Math.sign(dragTotal),200);return}
     vel=clamp(dragVel,-8,8);mode="momentum";wake()});
   stage.addEventListener("pointercancel",()=>{if(!dragging)return;dragging=false;stage.style.cursor="grab";if(!reduced){vel=clamp(dragVel,-8,8);mode="momentum";wake()}});
   let wheelLock=0;
   stage.addEventListener("wheel",e=>{const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;if(!delta)return;e.preventDefault();const now=performance.now();if(now<wheelLock)return;wheelLock=now+260;navigate(Math.round(pos)+(delta>0?1:-1),250)},{passive:false});
-  stage.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"){e.preventDefault();navigate(Math.round(pos)-1,250)}else if(e.key==="ArrowRight"){e.preventDefault();navigate(Math.round(pos)+1,250)}else if(e.key==="Enter"){e.preventDefault();onOpen?.(Math.round(clamp(pos,0,n-1)))}});
-  dots.forEach((d,i)=>d.addEventListener("click",()=>navigate(i,300)));
+  stage.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"){e.preventDefault();navigate(Math.round(pos)-1,250)}else if(e.key==="ArrowRight"){e.preventDefault();navigate(Math.round(pos)+1,250)}else if(e.key==="Enter"){e.preventDefault();onOpen?.(idx(pos))}});
+  dots.forEach((d,i)=>d.addEventListener("click",()=>navigate(Math.round(pos)+wrapD(i-Math.round(pos)),300)));
   const io=new IntersectionObserver(en=>{intersecting=en[0]?.isIntersecting??true;if(intersecting)wake()});io.observe(root);
   const ro=new ResizeObserver(()=>{const was=sized;layout();if(!sized)return;paintThumbs();paintStatic();applyTransforms();if(!was)syncActive();wake()});ro.observe(root);
   const onVis=()=>{if(!document.hidden)wake()};document.addEventListener("visibilitychange",onVis);
   if(reduced)for(const c of cards)c.style.transition="transform 200ms ease";
   layout();paintThumbs();paintStatic();applyTransforms();syncActive();wake();
-  return{index:()=>Math.round(clamp(pos,0,n-1)),destroy(){dead=true;cancelAnimationFrame(raf);io.disconnect();ro.disconnect();document.removeEventListener("visibilitychange",onVis)}};
+  return{index:()=>idx(pos),destroy(){dead=true;cancelAnimationFrame(raf);io.disconnect();ro.disconnect();document.removeEventListener("visibilitychange",onVis)}};
 }
 
 // ---------------------------------------------------------------------------
