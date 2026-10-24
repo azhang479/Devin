@@ -41,5 +41,5 @@ def test_api_smoke(tmp_path, monkeypatch):
             "blueriver",
             "summit",
         }
-        assert client.get("/").text.find("UI coming") >= 0
+        assert 'id="queue"' in client.get("/").text
         assert client.get("/static/index.html").status_code == 200

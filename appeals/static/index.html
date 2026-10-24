@@ -1,11 +1,236 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Appeals Copilot</title>
-  </head>
-  <body>
-    <main><h1>UI coming</h1></main>
-  </body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appeals Copilot</title>
+<style>
+  :root { --bg:#f6f7fb; --card:#fff; --ink:#1d2433; --muted:#6b7385; --line:#e4e7ef; --accent:#3b5bdb;
+          --appeal:#2f9e44; --resubmit:#1c7ed6; --gather:#f08c00; --write_off:#868e96; --bill:#ae3ec9; --danger:#e03131; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); }
+  header { background:#111a2e; color:#fff; padding:14px 24px; display:flex; align-items:center; gap:14px; }
+  header h1 { font-size:18px; margin:0; font-weight:650; }
+  header .tag { font-size:11px; background:#ffffff22; padding:2px 8px; border-radius:10px; }
+  header .spacer { flex:1; }
+  header button { background:var(--accent); color:#fff; border:0; padding:7px 14px; border-radius:6px; cursor:pointer; font-weight:600; }
+  main { padding:18px 24px; display:grid; grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); gap:18px; }
+  .stats { grid-column:1/-1; display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .stat .k { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  .stat .v { font-size:22px; font-weight:700; margin-top:2px; }
+  .stat .s { color:var(--muted); font-size:12px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .card h2 { font-size:14px; margin:0; padding:12px 14px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:8px; }
+  .card h2 .muted { font-weight:400; }
+  .filters { margin-left:auto; display:flex; gap:6px; }
+  .filters select { font-size:12px; padding:3px 6px; border:1px solid var(--line); border-radius:5px; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  th { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; background:#fafbfd; position:sticky; top:0; }
+  td.num, th.num { text-align:right; }
+  tbody tr { cursor:pointer; }
+  tbody tr:hover { background:#f3f6ff; }
+  tbody tr.sel { background:#e7edff; }
+  .queue-wrap { max-height:calc(100vh - 230px); overflow:auto; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:650; color:#fff; }
+  .a-appeal{background:var(--appeal)} .a-resubmit{background:var(--resubmit)} .a-gather_documentation{background:var(--gather)}
+  .a-write_off{background:var(--write_off)} .a-bill_patient{background:var(--bill)}
+  .st-approved { color:var(--appeal); font-weight:650; }
+  .late { color:var(--danger); font-weight:650; }
+  .soon { color:var(--gather); font-weight:650; }
+  .muted { color:var(--muted); }
+  .detail { padding:14px; max-height:calc(100vh - 230px); overflow:auto; }
+  .detail .empty { color:var(--muted); padding:40px 0; text-align:center; }
+  .kv { display:grid; grid-template-columns:130px 1fr; gap:4px 10px; margin-bottom:12px; }
+  .kv div:nth-child(odd) { color:var(--muted); }
+  .reason { background:#f8f9fc; border-left:3px solid var(--accent); padding:8px 10px; margin:8px 0 12px; border-radius:4px; }
+  h3 { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:14px 0 6px; }
+  ul.ev { margin:0; padding-left:0; list-style:none; }
+  ul.ev li { padding:5px 8px; border-radius:5px; margin-bottom:4px; }
+  ul.ev li.ok { background:#ebfbee; } ul.ev li.no { background:#fff4e6; }
+  ul.ev .snip { display:block; font-size:12px; color:var(--muted); font-style:italic; }
+  pre.letter, pre.note { white-space:pre-wrap; background:#fbfbfd; border:1px solid var(--line); border-radius:6px; padding:12px; font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; margin:0; }
+  pre.note { font-family:inherit; font-size:13px; }
+  .actions { display:flex; gap:8px; margin:10px 0; }
+  .btn { border:1px solid var(--line); background:#fff; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600; }
+  .btn.primary { background:var(--appeal); border-color:var(--appeal); color:#fff; }
+  .btn:disabled { opacity:.5; cursor:default; }
+  .bar { height:6px; background:#edf0f5; border-radius:3px; width:36px; display:inline-block; vertical-align:middle; margin-left:6px; }
+  .bar i { display:block; height:100%; background:var(--appeal); border-radius:3px; }
+  dialog { border:0; border-radius:10px; padding:0; width:520px; box-shadow:0 20px 60px #0004; }
+  dialog form { padding:18px; display:grid; gap:10px; }
+  dialog h2 { margin:0; font-size:16px; }
+  dialog label { font-size:12px; color:var(--muted); display:grid; gap:4px; }
+  dialog textarea { min-height:110px; font:13px/1.4 inherit; padding:8px; border:1px solid var(--line); border-radius:6px; }
+  dialog input[type=text] { padding:6px 8px; border:1px solid var(--line); border-radius:6px; }
+  .row { display:flex; gap:8px; justify-content:flex-end; }
+  .toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:#111a2e; color:#fff; padding:8px 16px; border-radius:6px; opacity:0; transition:opacity .2s; }
+  .toast.show { opacity:1; }
+  footer { padding:0 24px 18px; color:var(--muted); font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Appeals Copilot</h1>
+  <span class="tag">Synthetic data · decision support only</span>
+  <span class="spacer"></span>
+  <button id="uploadBtn">Upload remittance</button>
+</header>
+<main>
+  <section class="stats" id="stats"></section>
+  <section class="card">
+    <h2>Work queue <span class="muted" id="qcount"></span>
+      <span class="filters">
+        <select id="fAction"><option value="">All actions</option></select>
+        <select id="fPayer"><option value="">All payers</option></select>
+      </span>
+    </h2>
+    <div class="queue-wrap">
+      <table>
+        <thead><tr>
+          <th>Patient</th><th>Payer</th><th>CPT</th><th>Denial</th><th>Action</th>
+          <th class="num">At stake</th><th class="num">Days left</th><th>Win</th><th class="num">Priority</th>
+        </tr></thead>
+        <tbody id="queue"></tbody>
+      </table>
+    </div>
+  </section>
+  <section class="card">
+    <h2 id="dTitle">Denial detail</h2>
+    <div class="detail" id="detail"><div class="empty">Select a denial from the queue.</div></div>
+  </section>
+</main>
+<footer>All payers, policies, and patients are fictional. A clinician or biller reviews and approves every letter before submission.</footer>
+
+<dialog id="dlg">
+  <form method="dialog" id="upForm">
+    <h2>Upload a denial</h2>
+    <label>835 remittance file <input type="file" name="remit" required></label>
+    <label>Clinical note <textarea name="note" placeholder="Paste the relevant clinical note…"></textarea></label>
+    <label>Authorization number (optional) <input type="text" name="auth_number"></label>
+    <label style="display:flex;align-items:center;gap:6px;color:var(--ink)"><input type="checkbox" name="proof_of_timely_filing"> Proof of timely filing on file</label>
+    <div class="row"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn primary" id="upSubmit" value="ok">Triage</button></div>
+  </form>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const money = n => (n ?? 0).toLocaleString("en-US", {style:"currency", currency:"USD", maximumFractionDigits:0});
+const pct = n => Math.round((n ?? 0) * 100) + "%";
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const label = a => String(a || "").replace(/_/g, " ");
+let queue = [], selected = null;
+
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2200); }
+async function api(path, opts) { const r = await fetch(path, opts); if (!r.ok) throw new Error(path + " → " + r.status); return r.headers.get("content-type")?.includes("json") ? r.json() : r.text(); }
+
+async function loadStats() {
+  const s = await api("/api/stats");
+  const by = s.count_by_action || s.by_action || {};
+  const total = s.total_count ?? Object.values(by).reduce((a, b) => a + b, 0);
+  const recoverable = s.appeal_and_resubmit_amount ?? s.total_recoverable ?? s.total_in_appeal_resubmit ?? s.recoverable ?? 0;
+  $("#stats").innerHTML = `
+    <div class="stat"><div class="k">Denials</div><div class="v">${total}</div><div class="s">${by.appeal || 0} appeal · ${by.resubmit || 0} resubmit</div></div>
+    <div class="stat"><div class="k">Total at stake</div><div class="v">${money(s.total_amount_at_stake ?? s.total_at_stake)}</div><div class="s">billed − paid</div></div>
+    <div class="stat"><div class="k">Worth pursuing</div><div class="v">${money(recoverable)}</div><div class="s">in appeal + resubmit</div></div>
+    <div class="stat"><div class="k">Expected recovery</div><div class="v" style="color:var(--appeal)">${money(s.expected_recovery)}</div><div class="s">Σ amount × win probability</div></div>`;
+}
+
+function fillFilters() {
+  const fill = (sel, vals) => { const cur = sel.value; sel.length = 1; [...new Set(vals)].sort().forEach(v => sel.add(new Option(label(v), v))); sel.value = cur; };
+  fill($("#fAction"), queue.map(q => q.action));
+  fill($("#fPayer"), queue.map(q => q.payer_name || q.payer));
+}
+
+function renderQueue() {
+  const fa = $("#fAction").value, fp = $("#fPayer").value;
+  const rows = queue.filter(q => (!fa || q.action === fa) && (!fp || (q.payer_name || q.payer) === fp));
+  $("#qcount").textContent = `· ${rows.length}`;
+  $("#queue").innerHTML = rows.map(q => {
+    const dl = q.days_left;
+    const dcls = dl < 0 ? "late" : dl <= 14 ? "soon" : "";
+    const win = q.win_probability || 0;
+    return `<tr data-id="${esc(q.id)}" class="${q.id === selected ? "sel" : ""}">
+      <td>${esc(q.patient)}${q.status === "approved" ? ' <span class="st-approved">✓</span>' : ""}</td>
+      <td>${esc((q.payer_name || q.payer || "").replace(/ \(synthetic\)$/, ""))}</td><td>${esc(q.cpt)}</td>
+      <td><span title="${esc(q.category)}">${esc(q.carc)}</span> <span class="muted">${esc(label(q.category))}</span></td>
+      <td><span class="badge a-${esc(q.action)}">${esc(label(q.action))}</span></td>
+      <td class="num">${money(q.amount_at_stake)}</td>
+      <td class="num ${dcls}">${dl < 0 ? "passed" : dl}</td>
+      <td>${win ? pct(win) + `<span class="bar"><i style="width:${win * 100}%"></i></span>` : '<span class="muted">—</span>'}</td>
+      <td class="num">${Math.round(q.priority || 0).toLocaleString()}</td></tr>`;
+  }).join("");
+}
+
+async function loadQueue() { queue = await api("/api/queue"); fillFilters(); renderQueue(); }
+
+function evidenceList(ev) {
+  if (!ev) return '<p class="muted">No policy criteria apply to this denial type.</p>';
+  const item = (m, ok) => {
+    const id = typeof m === "string" ? m : (m.id || m.criterion_id);
+    const desc = typeof m === "string" ? "" : (m.description || "");
+    const snip = typeof m === "string" ? "" : (m.snippet || "");
+    return `<li class="${ok ? "ok" : "no"}">${ok ? "✓" : "✗"} <b>${esc(desc || id)}</b>${snip ? `<span class="snip">“…${esc(snip)}…”</span>` : ""}</li>`;
+  };
+  const matched = ev.matched || [], missing = (ev.missing_details && ev.missing_details.length ? ev.missing_details : ev.missing) || [];
+  if (!matched.length && !missing.length) return '<p class="muted">No policy criteria apply to this denial type.</p>';
+  return `<ul class="ev">${matched.map(m => item(m, true)).join("")}${missing.map(m => item(m, false)).join("")}</ul>
+    <p class="muted" style="margin:6px 0 0">${ev.meets_min ? "Meets" : "Does not meet"} the policy's minimum criteria.</p>`;
+}
+
+async function showDetail(id) {
+  selected = id; renderQueue();
+  const d = await api(`/api/denials/${encodeURIComponent(id)}`);
+  const t = d.triage || d;
+  const claim = d.claim || d.denial || d;
+  const patient = claim.patient || claim.patient_name || d.patient || "";
+  $("#dTitle").innerHTML = `${esc(patient)} <span class="muted">· claim ${esc(claim.claim_id || d.claim_id || id)}</span>`;
+  const approved = d.status === "approved";
+  $("#detail").innerHTML = `
+    <div><span class="badge a-${esc(t.action)}">${esc(label(t.action))}</span> <span class="muted">${esc(t.carc)} · ${esc(label(t.category))}</span></div>
+    <div class="reason">${esc(t.reason)}</div>
+    <div class="kv">
+      <div>Payer</div><div>${esc(d.payer?.name || d.payer_name || claim.payer_name || claim.payer_id || "")}</div>
+      <div>Amount at stake</div><div>${money(t.amount_at_stake)}</div>
+      <div>Appeal deadline</div><div>${esc(t.deadline)} <span class="${t.days_left < 0 ? "late" : t.days_left <= 14 ? "soon" : "muted"}">(${t.days_left < 0 ? "passed" : t.days_left + " days left"})</span></div>
+      <div>Win probability</div><div>${t.win_probability ? pct(t.win_probability) : "—"}</div>
+      <div>Policy</div><div>${esc(t.policy_id || "—")}</div>
+    </div>
+    <h3>Policy criteria vs. clinical note</h3>${evidenceList(t.evidence)}
+    <h3>Clinical note</h3><pre class="note">${esc(d.note || d.note_text || "")}</pre>
+    ${d.letter ? `<h3>Draft appeal letter</h3>
+      <div class="actions">
+        <button class="btn primary" id="approveBtn" ${approved ? "disabled" : ""}>${approved ? "Approved ✓" : "Approve letter"}</button>
+        <a class="btn" href="/api/denials/${encodeURIComponent(id)}/letter.txt" download="appeal-${esc(id)}.txt">Download .txt</a>
+      </div><pre class="letter">${esc(d.letter)}</pre>` : ""}`;
+  const ab = $("#approveBtn");
+  if (ab) ab.onclick = async () => { await api(`/api/denials/${encodeURIComponent(id)}/approve`, {method:"POST"}); toast("Letter approved"); await loadQueue(); showDetail(id); };
+}
+
+$("#queue").addEventListener("click", e => { const tr = e.target.closest("tr[data-id]"); if (tr) showDetail(tr.dataset.id); });
+$("#fAction").onchange = renderQueue; $("#fPayer").onchange = renderQueue;
+$("#uploadBtn").onclick = () => $("#dlg").showModal();
+$("#upForm").addEventListener("submit", async e => {
+  if (e.submitter?.value !== "ok") return;
+  e.preventDefault();
+  const f = e.target, fd = new FormData();
+  fd.append("remit", f.remit.files[0]);
+  fd.append("note", f.note.value);
+  if (f.auth_number.value) fd.append("auth_number", f.auth_number.value);
+  fd.append("proof_of_timely_filing", f.proof_of_timely_filing.checked ? "true" : "false");
+  try {
+    const res = await api("/api/denials", {method:"POST", body:fd});
+    $("#dlg").close(); f.reset();
+    const ids = res.ids || res;
+    toast(`Triaged ${ids.length} claim${ids.length === 1 ? "" : "s"}`);
+    await Promise.all([loadQueue(), loadStats()]);
+    if (ids[0]) showDetail(ids[0]);
+  } catch (err) { toast("Upload failed: " + err.message); }
+});
+
+Promise.all([loadStats(), loadQueue()]).then(() => { if (queue[0]) showDetail(queue[0].id); }).catch(e => toast(e.message));
+</script>
+</body>
 </html>

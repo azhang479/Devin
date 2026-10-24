@@ -36,12 +36,13 @@ class Denial(Claim):
 class CriterionEvidence(BaseModel):
     criterion_id: str
     description: str
-    snippet: str
+    snippet: str | None = None
 
 
 class EvidenceResult(BaseModel):
     matched: list[CriterionEvidence] = Field(default_factory=list)
     missing: list[str] = Field(default_factory=list)
+    missing_details: list[CriterionEvidence] = Field(default_factory=list)
     meets_min: bool = False
 
 

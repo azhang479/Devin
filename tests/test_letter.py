@@ -33,6 +33,8 @@ def test_appeal_letter_renders_policy_and_evidence_and_nonappeal_is_none():
     )
     letter = render_letter(denial, result, payer, payer.policies[0])
     assert letter is not None
+    assert "Springfield Family Medicine\n\nTo: Acme Health Plan (synthetic) — Appeals" in letter
+    assert "PO Box 100, Springfield\nFax: 555-0100" in letter
     assert "ACME-RAD-014" in letter
     assert "6 weeks of failed conservative therapy" in letter
     assert "DRAFT — requires clinician/biller review before submission" in letter
