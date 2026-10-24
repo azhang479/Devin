@@ -396,7 +396,7 @@ function causticCoverflow(root,items,{cardWidth=236,cardHeight=296,start:start0=
 // reading order at a 15ms stagger. DOM order never changes between views.
 // ---------------------------------------------------------------------------
 const VIEWS=[["list","List"],["grid","Grid"],["board","Board"]];
-const GAP=12,ITEM_H={list:54,grid:100,board:100},BOARD_HEAD=62,PAD=8,STAGGER_MS=15,TRAVEL_MS=560,RAIL_FADE_MS=150,REDUCED_MS=120,EASE_OUT_EXPO="cubic-bezier(0.16, 1, 0.3, 1)";
+const GAP=12,ITEM_H={list:54,grid:100,board:100},BOARD_HEAD=62,PAD=8,STAGGER_MS=15,TRAVEL_MS=560,RAIL_FADE_MS=90,REDUCED_MS=120,EASE_OUT_EXPO="cubic-bezier(0.16, 1, 0.3, 1)";
 let view=localStorage.getItem("appealsView")||"board";if(!VIEWS.some(v=>v[0]===view))view="board";
 const yardEls=new Map();let yardTimers=[],yardRails=[];
 function yardItems(){const s=q.toLowerCase();return queue.filter(x=>(!payer||x.payer_name===payer)&&(!s||[x.patient,x.cpt,x.carc,x.category,x.payer_name,x.id].join(" ").toLowerCase().includes(s))).sort((x,y)=>sortKey==="days_left"?x.days_left-y.days_left:y[sortKey]-x[sortKey])}
@@ -441,8 +441,8 @@ function ride(old,items){
   items.forEach((x,i)=>{const el=yardEls.get(x.id),o=old.get(x.id);if(!el||!o)return;const nr=el.getBoundingClientRect(),dx=o.left-nr.left,dy=o.top-nr.top;if(Math.abs(dx)<.5&&Math.abs(dy)<.5)return;const delay=i*STAGGER_MS;
     if(useOffset){const l=bow(dx,dy,0,0);el.style.transition="none";el.style.setProperty("offset-rotate","0deg");el.style.setProperty("offset-anchor","0px 0px");el.style.setProperty("offset-path",`path('M ${dx} ${dy} C ${l.c1x} ${l.c1y} ${l.c2x} ${l.c2y} 0 0')`);el.style.setProperty("offset-distance","0%");void el.offsetWidth;
       const ox=o.left+o.width/2-cb.left,oy=o.top+o.height/2-cb.top,nx=nr.left+nr.width/2-cb.left,ny=nr.top+nr.height/2-cb.top,r=bow(ox,oy,nx,ny),path=document.createElementNS("http://www.w3.org/2000/svg","path");
-      path.setAttribute("d",`M ${ox} ${oy} C ${r.c1x} ${r.c1y} ${r.c2x} ${r.c2y} ${nx} ${ny}`);path.setAttribute("fill","none");path.style.stroke="var(--ns-muted)";path.setAttribute("stroke-width","1.25");path.style.strokeOpacity="0.5";path.style.transition=`opacity ${RAIL_FADE_MS}ms ease-out`;svg.appendChild(path);yardRails.push(path);
-      yardTimers.push(setTimeout(()=>{el.style.transition=`offset-distance ${TRAVEL_MS}ms ${EASE_OUT_EXPO}`;el.style.setProperty("offset-distance","100%")},delay));
+      path.setAttribute("d",`M ${ox} ${oy} C ${r.c1x} ${r.c1y} ${r.c2x} ${r.c2y} ${nx} ${ny}`);path.setAttribute("fill","none");path.style.stroke="var(--border)";path.setAttribute("stroke-width","1");path.style.strokeOpacity="0.6";path.style.transition=`opacity ${RAIL_FADE_MS}ms ease-out`;svg.appendChild(path);yardRails.push(path);
+      yardTimers.push(setTimeout(()=>{el.style.transition=`offset-distance ${TRAVEL_MS}ms ${EASE_OUT_EXPO}`;el.style.setProperty("offset-distance","100%")},delay));yardTimers.push(setTimeout(()=>{path.style.opacity="0"},delay+TRAVEL_MS*.6));
       yardTimers.push(setTimeout(()=>{el.style.transition="";["offset-path","offset-distance","offset-anchor","offset-rotate"].forEach(p=>el.style.removeProperty(p));path.style.opacity="0";yardTimers.push(setTimeout(()=>{path.remove();yardRails=yardRails.filter(p=>p!==path)},RAIL_FADE_MS+30))},delay+TRAVEL_MS))}
     else{el.style.transition="none";el.style.transform=`translate3d(${dx}px,${dy}px,0)`;void el.offsetWidth;yardTimers.push(setTimeout(()=>{el.style.transition=`transform ${TRAVEL_MS}ms ${EASE_OUT_EXPO}`;el.style.transform="translate3d(0,0,0)"},delay));yardTimers.push(setTimeout(()=>{el.style.transition="";el.style.transform=""},delay+TRAVEL_MS))}});
 }
