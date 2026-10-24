@@ -1,0 +1,13 @@
+{
+  "id": "CASE-003",
+  "scenario": "mednec_deadline_passed",
+  "payer_id": "acme",
+  "note": "The patient reports low back pain radiating into the leg affecting usual activities. Today's clinical note documents 6 weeks and persistent symptoms despite care. The clinician recommends the requested service to guide the next stage of treatment.",
+  "auth_number": null,
+  "proof_of_timely_filing": false,
+  "remit_file": "CASE-003.835",
+  "expected": {
+    "category": "medical_necessity",
+    "action": "write_off"
+  }
+}

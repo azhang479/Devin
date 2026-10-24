@@ -1,0 +1,28 @@
+{{ practice }}
+{{ destination.address }}
+Fax: {{ destination.fax }}
+
+Re: Appeal for claim {{ denial.claim_id }}
+Patient: {{ denial.patient_name }}
+Date of service: {{ denial.service_date or "Not provided" }}
+CPT: {{ denial.lines | map(attribute="cpt") | unique | join(", ") }}
+Denial code: {{ triage.carc }} — {{ carc_description }}
+
+{{ payer.appeal.levels[0] }}
+{% if policy %}
+Policy: {{ policy.policy_id }} — {{ policy.title }} (version {{ policy.version }})
+{% endif %}
+
+Dear Appeals Reviewer,
+
+We request reprocessing of claim {{ denial.claim_id }}. The clinical documentation supports the service:
+{% for item in triage.evidence.matched %}
+- {{ item.description }}: “{{ item.snippet }}”
+{% endfor %}
+
+Please review the enclosed documentation and reprocess this claim. Thank you for your consideration.
+
+Sincerely,
+Clinician / billing representative: ____________________
+
+DRAFT — requires clinician/biller review before submission

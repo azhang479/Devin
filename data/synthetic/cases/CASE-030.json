@@ -1,0 +1,13 @@
+{
+  "id": "CASE-030",
+  "scenario": "missing_info",
+  "payer_id": "acme",
+  "note": "The patient attended a routine visit for ongoing care. The clinician reviewed the treatment plan and current symptoms. Follow-up was arranged according to the care plan.",
+  "auth_number": null,
+  "proof_of_timely_filing": false,
+  "remit_file": "CASE-030.835",
+  "expected": {
+    "category": "coding_error",
+    "action": "resubmit"
+  }
+}

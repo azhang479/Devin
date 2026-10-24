@@ -1,0 +1,13 @@
+{
+  "id": "CASE-005",
+  "scenario": "bundling_mod59",
+  "payer_id": "summit",
+  "note": "The patient received a separate therapeutic exercise service during this visit. The interventions addressed distinct functional goals from the other billed service. The clinician documented the separate work and response.",
+  "auth_number": null,
+  "proof_of_timely_filing": false,
+  "remit_file": "CASE-005.835",
+  "expected": {
+    "category": "bundling",
+    "action": "appeal"
+  }
+}

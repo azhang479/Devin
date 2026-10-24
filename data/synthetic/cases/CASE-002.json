@@ -1,0 +1,13 @@
+{
+  "id": "CASE-002",
+  "scenario": "prior_auth_has_number",
+  "payer_id": "summit",
+  "note": "The patient attended a planned visit for ongoing symptoms. The clinician provided the service and reviewed the treatment plan. Authorization documentation is available for this episode.",
+  "auth_number": "SYN-AUTH-002",
+  "proof_of_timely_filing": false,
+  "remit_file": "CASE-002.835",
+  "expected": {
+    "category": "prior_auth",
+    "action": "resubmit"
+  }
+}

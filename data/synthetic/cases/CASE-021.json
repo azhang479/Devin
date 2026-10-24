@@ -1,0 +1,13 @@
+{
+  "id": "CASE-021",
+  "scenario": "prior_auth_none",
+  "payer_id": "summit",
+  "note": "The patient attended a scheduled outpatient visit for chronic symptoms. The clinician reviewed the existing plan and discussed routine follow-up. The record contains no authorization reference or exception documentation.",
+  "auth_number": null,
+  "proof_of_timely_filing": false,
+  "remit_file": "CASE-021.835",
+  "expected": {
+    "category": "prior_auth",
+    "action": "write_off"
+  }
+}

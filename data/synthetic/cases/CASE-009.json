@@ -1,0 +1,13 @@
+{
+  "id": "CASE-009",
+  "scenario": "frequency_supported",
+  "payer_id": "summit",
+  "note": "The patient reports reduced strength and difficulty completing daily movement affecting usual activities. Today's clinical note documents limited range and graded exercise and persistent symptoms despite care. The clinician recommends the requested service to guide the next stage of treatment.",
+  "auth_number": null,
+  "proof_of_timely_filing": false,
+  "remit_file": "CASE-009.835",
+  "expected": {
+    "category": "medical_necessity",
+    "action": "appeal"
+  }
+}

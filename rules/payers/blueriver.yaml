@@ -1,0 +1,80 @@
+payer_id: blueriver
+name: Blue River Assurance (synthetic)
+appeal:
+  deadline_days: 90
+  levels:
+    - Level 1 reconsideration
+    - Level 2 appeal
+    - Independent external review
+  submit_to:
+    fax: "555-0200"
+    address: "PO Box 200, Riverton"
+policies:
+  - policy_id: BR-RAD-032
+    title: Lumbar MRI clinical indications
+    version: "2026-04"
+    effective_date: 2026-04-01
+    cpt_codes: ["72148"]
+    min_criteria: 2
+    criteria:
+      - id: conservative_therapy
+        description: At least six weeks of conservative treatment
+        any_of: ["6 weeks", "six weeks", "physical therapy", "home exercise"]
+      - id: neuro_deficit
+        description: Neurologic symptoms are present
+        any_of: ["weakness", "numbness", "radiculopathy", "reflex change"]
+      - id: imaging_plan
+        description: Imaging will guide treatment planning
+        any_of: ["surgical planning", "injection planning", "imaging will guide"]
+  - policy_id: BR-PT-017
+    title: Therapeutic exercise documentation
+    version: "2026-02"
+    effective_date: 2026-02-01
+    cpt_codes: ["97110"]
+    min_criteria: 1
+    criteria:
+      - id: functional_limit
+        description: Functional limitation is documented
+        any_of: ["limited range", "difficulty walking", "functional limitation"]
+      - id: skilled_progression
+        description: Skilled exercise progression is described
+        any_of: ["graded exercise", "progressive resistance", "home exercise program"]
+      - id: measurable_progress
+        description: Measurable progress is documented
+        any_of: ["improved range", "strength improved", "functional gains"]
+  - policy_id: BR-ORTH-011
+    title: Knee arthroscopy coverage criteria
+    version: "2026-03"
+    effective_date: 2026-03-01
+    cpt_codes: ["29881"]
+    min_criteria: 2
+    criteria:
+      - id: mechanical_symptoms
+        description: Persistent mechanical knee symptoms
+        any_of: ["locking", "catching", "joint line pain"]
+      - id: conservative_care
+        description: Conservative treatment was attempted
+        any_of: ["physical therapy", "anti-inflammatory", "failed conservative"]
+      - id: imaging_finding
+        description: Imaging supports the proposed treatment
+        any_of: ["meniscal tear", "MRI confirms", "imaging shows"]
+  - policy_id: BR-SLEEP-004
+    title: Attended sleep study criteria
+    version: "2026-05"
+    effective_date: 2026-05-01
+    cpt_codes: ["95810"]
+    min_criteria: 1
+    criteria:
+      - id: sleep_symptoms
+        description: Sleep-related symptoms are documented
+        any_of: ["daytime sleepiness", "snoring", "witnessed apnea"]
+      - id: risk_factors
+        description: Relevant risk factors are documented
+        any_of: ["hypertension", "obesity", "morning headache"]
+      - id: prior_screening
+        description: Prior screening supports testing
+        any_of: ["screening score", "sleep questionnaire", "high risk"]
+bundling:
+  modifiers: ["25", "59", "XS"]
+  keywords: ["separate", "distinct", "different session", "separately identifiable"]
+emergency_keywords: ["emergency", "emergent", "urgent", "ED visit"]

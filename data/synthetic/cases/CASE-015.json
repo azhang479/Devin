@@ -1,0 +1,13 @@
+{
+  "id": "CASE-015",
+  "scenario": "prior_auth_emergency",
+  "payer_id": "summit",
+  "note": "The patient presented for an urgent evaluation after a sudden change in symptoms. Care was provided during an emergent episode in the emergency department. The clinician stabilized the patient and documented the need for immediate treatment.",
+  "auth_number": null,
+  "proof_of_timely_filing": false,
+  "remit_file": "CASE-015.835",
+  "expected": {
+    "category": "prior_auth",
+    "action": "appeal"
+  }
+}

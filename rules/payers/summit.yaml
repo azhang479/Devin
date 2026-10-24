@@ -1,0 +1,74 @@
+payer_id: summit
+name: Summit Mutual Health (synthetic)
+appeal:
+  deadline_days: 60
+  levels:
+    - Level 1 provider appeal
+    - Level 2 clinical review
+    - External review
+  submit_to:
+    fax: "555-0300"
+    address: "PO Box 300, Summit City"
+policies:
+  - policy_id: SUM-RAD-019
+    title: Lumbar MRI medical necessity
+    version: "2026-02"
+    effective_date: 2026-02-01
+    cpt_codes: ["72148"]
+    min_criteria: 1
+    criteria:
+      - id: conservative_therapy
+        description: Conservative therapy has not resolved symptoms
+        any_of: ["6 weeks", "six weeks", "failed conservative", "physical therapy"]
+      - id: neuro_deficit
+        description: Neurologic findings are documented
+        any_of: ["weakness", "numbness", "foot drop", "radiculopathy"]
+  - policy_id: SUM-PT-026
+    title: Therapeutic exercise services
+    version: "2026-03"
+    effective_date: 2026-03-01
+    cpt_codes: ["97110"]
+    min_criteria: 2
+    criteria:
+      - id: functional_limit
+        description: Functional limitation is documented
+        any_of: ["limited range", "difficulty walking", "functional limitation"]
+      - id: skilled_progression
+        description: Skilled progression is documented
+        any_of: ["graded exercise", "progressive resistance", "home exercise program"]
+      - id: measurable_progress
+        description: Functional progress is documented
+        any_of: ["improved range", "strength improved", "functional gains"]
+  - policy_id: SUM-ORTH-015
+    title: Knee arthroscopy criteria
+    version: "2026-01"
+    effective_date: 2026-01-01
+    cpt_codes: ["29881"]
+    min_criteria: 1
+    criteria:
+      - id: mechanical_symptoms
+        description: Mechanical knee symptoms are documented
+        any_of: ["locking", "catching", "joint line pain"]
+      - id: conservative_care
+        description: Conservative care was attempted
+        any_of: ["physical therapy", "anti-inflammatory", "failed conservative"]
+  - policy_id: SUM-SLEEP-009
+    title: Attended polysomnography coverage
+    version: "2026-04"
+    effective_date: 2026-04-01
+    cpt_codes: ["95810"]
+    min_criteria: 2
+    criteria:
+      - id: sleep_symptoms
+        description: Sleep-related symptoms are documented
+        any_of: ["daytime sleepiness", "snoring", "witnessed apnea"]
+      - id: risk_factors
+        description: Relevant risk factors are documented
+        any_of: ["hypertension", "obesity", "morning headache"]
+      - id: prior_screening
+        description: Prior screening supports further study
+        any_of: ["screening score", "sleep questionnaire", "high risk"]
+bundling:
+  modifiers: ["25", "59", "XS"]
+  keywords: ["separate", "distinct", "different session", "separately identifiable"]
+emergency_keywords: ["emergency", "emergent", "urgent", "ED visit"]

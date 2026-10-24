@@ -1,0 +1,48 @@
+"1":
+  description: Deductible
+  category: patient_responsibility
+"2":
+  description: Coinsurance
+  category: patient_responsibility
+"3":
+  description: Copay
+  category: patient_responsibility
+"4":
+  description: Procedure code inconsistent with modifier or modifier missing
+  category: coding_error
+"11":
+  description: Diagnosis inconsistent with procedure
+  category: coding_error
+"16":
+  description: Claim lacks information or has billing errors
+  category: coding_error
+"18":
+  description: Exact duplicate claim or service
+  category: duplicate
+"22":
+  description: May be covered by another payer
+  category: cob
+"27":
+  description: Expenses incurred after coverage terminated
+  category: eligibility
+"29":
+  description: Time limit for filing has expired
+  category: timely_filing
+"45":
+  description: "Charge exceeds fee schedule or contracted amount"
+  category: contractual
+"50":
+  description: "Non-covered: not deemed a medical necessity"
+  category: medical_necessity
+"97":
+  description: Benefit included in payment for another service
+  category: bundling
+"151":
+  description: Information does not support this many or frequency of services
+  category: medical_necessity
+"167":
+  description: Diagnosis not covered
+  category: medical_necessity
+"197":
+  description: Precertification or authorization absent
+  category: prior_auth

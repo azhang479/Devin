@@ -1,0 +1,13 @@
+{
+  "id": "CASE-006",
+  "scenario": "mednec_unsupported",
+  "payer_id": "summit",
+  "note": "The patient reports intermittent discomfort during daily activity. Examination findings are stable without new concerns. Routine follow-up and home care were discussed.",
+  "auth_number": null,
+  "proof_of_timely_filing": false,
+  "remit_file": "CASE-006.835",
+  "expected": {
+    "category": "medical_necessity",
+    "action": "gather_documentation"
+  }
+}

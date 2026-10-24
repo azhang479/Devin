@@ -1,0 +1,92 @@
+{
+  "today": "2026-10-24",
+  "cases": 30,
+  "category_accuracy": 1.0,
+  "action_accuracy": 1.0,
+  "category_correct": 30,
+  "action_correct": 30,
+  "total_amount_at_stake": 53965.5,
+  "expected_recovery": 24297.46,
+  "scenarios": {
+    "modifier_error": {
+      "cases": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "prior_auth_has_number": {
+      "cases": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "mednec_deadline_passed": {
+      "cases": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "timely_no_proof": {
+      "cases": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "bundling_mod59": {
+      "cases": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "mednec_unsupported": {
+      "cases": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "mednec_supported": {
+      "cases": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    "frequency_supported": {
+      "cases": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "prior_auth_emergency": {
+      "cases": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "timely_with_proof": {
+      "cases": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "deductible": {
+      "cases": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "missing_info": {
+      "cases": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "cob": {
+      "cases": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "prior_auth_none": {
+      "cases": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "eligibility": {
+      "cases": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "duplicate": {
+      "cases": 1,
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

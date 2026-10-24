@@ -1,0 +1,74 @@
+payer_id: acme
+name: Acme Health Plan (synthetic)
+appeal:
+  deadline_days: 180
+  levels:
+    - Level 1 internal appeal
+    - Level 2 internal appeal
+    - External review
+  submit_to:
+    fax: "555-0100"
+    address: "PO Box 100, Springfield"
+policies:
+  - policy_id: ACME-RAD-014
+    title: Advanced imaging of the lumbar spine
+    version: "2026-01"
+    effective_date: 2026-01-01
+    cpt_codes: ["72148"]
+    min_criteria: 1
+    criteria:
+      - id: conservative_therapy
+        description: At least 6 weeks of failed conservative therapy
+        any_of: ["6 weeks", "six weeks", "failed conservative", "physical therapy"]
+      - id: neuro_deficit
+        description: Progressive neurological deficit
+        any_of: ["weakness", "numbness", "foot drop", "radiculopathy"]
+  - policy_id: ACME-PT-021
+    title: Therapeutic exercise services
+    version: "2026-02"
+    effective_date: 2026-02-01
+    cpt_codes: ["97110"]
+    min_criteria: 2
+    criteria:
+      - id: functional_limit
+        description: Documented functional limitation
+        any_of: ["limited range", "difficulty walking", "functional limitation"]
+      - id: skilled_progression
+        description: Skilled exercise progression is documented
+        any_of: ["graded exercise", "progressive resistance", "home exercise program"]
+      - id: measurable_progress
+        description: Measurable progress is recorded
+        any_of: ["improved range", "strength improved", "functional gains"]
+  - policy_id: ACME-ORTH-008
+    title: Knee arthroscopy medical necessity
+    version: "2026-01"
+    effective_date: 2026-01-01
+    cpt_codes: ["29881"]
+    min_criteria: 1
+    criteria:
+      - id: mechanical_symptoms
+        description: Persistent mechanical knee symptoms
+        any_of: ["locking", "catching", "joint line pain"]
+      - id: conservative_care
+        description: Conservative treatment was attempted
+        any_of: ["physical therapy", "anti-inflammatory", "failed conservative"]
+  - policy_id: ACME-SLEEP-006
+    title: Attended sleep study criteria
+    version: "2026-03"
+    effective_date: 2026-03-01
+    cpt_codes: ["95810"]
+    min_criteria: 2
+    criteria:
+      - id: sleep_symptoms
+        description: Sleep-related symptoms are documented
+        any_of: ["daytime sleepiness", "snoring", "witnessed apnea"]
+      - id: risk_factors
+        description: Relevant risk factors are documented
+        any_of: ["hypertension", "obesity", "morning headache"]
+      - id: prior_screening
+        description: Prior screening supports further testing
+        any_of: ["screening score", "sleep questionnaire", "high risk"]
+bundling:
+  modifiers: ["25", "59", "XS"]
+  keywords: ["separate", "distinct", "different session", "separately identifiable"]
+emergency_keywords: ["emergency", "emergent", "urgent", "ED visit"]
