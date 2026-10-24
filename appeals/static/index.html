@@ -41,7 +41,7 @@ svg.i{width:16px;height:16px;flex-shrink:0;fill:none;stroke:currentColor;stroke-
 .side-nav button.on{background:var(--sidebar-accent);color:var(--sidebar-accent-foreground);font-weight:500}
 .side-nav button:focus-visible{outline:none;box-shadow:0 0 0 2px var(--sidebar-ring)}
 .side .ai{margin:auto 0 0;display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius-2xl);background:var(--background);box-shadow:0 0 0 1px var(--sidebar-border);font-size:12.5px;line-height:1.45;color:var(--muted-foreground)}
-.side .ai .mote{flex-shrink:0}.side .ai:not(.on) .mote{opacity:.35}
+.side .ai[hidden]{display:none}.side .ai .mote{flex-shrink:0}.side .ai:not(.on) .mote{opacity:.35}
 .side-foot{font-size:11.5px;color:var(--muted-foreground);line-height:1.5;padding:4px 8px 0}
 /* layout */
 .content{display:flex;flex-direction:column;height:100vh;min-width:0;background:var(--background)}
@@ -184,7 +184,7 @@ dialog input[type=text]{font-weight:400}
     <div><div class="lname">Stella</div><div class="ltag">Your Denial Evaluation &amp; Value Intelligence Navigator</div></div></div>
   <div class="glabel-side">Workspace</div>
   <nav class="side-nav"><button data-tab="overview" class="on"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Overview</button><button data-tab="queue"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v11"/><path d="M12 5v6"/><path d="M18 5v14"/></svg>Review queue</button><button id="navNew"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>New denial</button></nav>
-  <div class="ai" id="aiPill"><span class="mote" id="aiMote"></span><span id="aiText">AI off</span></div>
+  <div class="ai" id="aiPill" hidden><span class="mote" id="aiMote"></span><span id="aiText"></span></div>
   <div class="side-foot">Synthetic data · decision support only. A clinician or biller approves every letter before it is sent.</div>
 </aside>
 <div class="content">
@@ -296,13 +296,14 @@ function gyreMote(host,{size=96,state="thinking",label:text,showLabel=false}={})
 // header AI pill: idle sphere when the local model is ready, thinking while any AI call runs
 let aiBusy=0,pillMote=null,pillDone=0;
 function setPill(){
-  const p=$("#aiPill");p.className="ai"+(ai.enabled?(ai.reachable?" on":" down"):"");
-  $("#aiText").textContent=!ai.enabled?"Local AI off: deterministic rules only":!ai.reachable?`Local model ${ai.model} unreachable`:aiBusy?`Local model working (${ai.model}), 0 bytes leave this machine`:"Local model connected, 0 bytes leave this machine";
-  $("#ovSub").innerHTML=ai.enabled?`<svg class="i" style="width:14px;height:14px" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Local model: <code>${esc(ai.model)}</code> via Ollama — 0 bytes of patient data sent externally`:"Local AI off — deterministic rules only";
+  const p=$("#aiPill");p.hidden=!ai.enabled;p.className="ai"+(ai.reachable?" on":" down");
+  $("#aiText").textContent=!ai.reachable?`Local model ${ai.model} unreachable`:aiBusy?`Local model working (${ai.model}), 0 bytes leave this machine`:"Local model connected, 0 bytes leave this machine";
+  $("#ovSub").innerHTML=ai.enabled?`<svg class="i" style="width:14px;height:14px" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Local model: <code>${esc(ai.model)}</code> via Ollama — 0 bytes of patient data sent externally`:"Synthetic data · a person reviews every letter before it is sent";
+  if(!ai.enabled)return;
   if(!pillMote)pillMote=gyreMote($("#aiMote"),{size:30,state:"idle"});
-  pillMote.set(aiBusy?"thinking":"idle",ai.enabled?(aiBusy?"Local AI working":"Local AI ready"):"AI off");
+  pillMote.set(aiBusy?"thinking":"idle",aiBusy?"Local AI working":"Local AI ready");
 }
-async function withAI(fn){aiBusy++;setPill();try{return await fn()}finally{aiBusy--;if(!aiBusy){pillMote.set("done","Local AI done");clearTimeout(pillDone);pillDone=setTimeout(()=>{if(!aiBusy)setPill()},1800)}}}
+async function withAI(fn){aiBusy++;setPill();try{return await fn()}finally{aiBusy--;if(!aiBusy&&pillMote){pillMote.set("done","Local AI done");clearTimeout(pillDone);pillDone=setTimeout(()=>{if(!aiBusy)setPill()},1800)}}}
 async function loadAi(){try{ai=await api("/api/ai/status")}catch{ai={enabled:false}}setPill()}
 
 // ---------------------------------------------------------------------------
@@ -528,13 +529,19 @@ $("#uploadBtn").onclick=$("#uploadBtn2").onclick=()=>$("#dlg").showModal();
 const drop=$("#drop");["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();drop.classList.add("over")}));
 ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();drop.classList.remove("over")}));
 drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f){const dt=new DataTransfer();dt.items.add(f);$("#upForm").remit.files=dt.files}});
+const UPLOAD_MIN_MS=10000;
 $("#upForm").addEventListener("submit",async e=>{if(e.submitter?.value!=="ok")return;e.preventDefault();const f=e.target,file=f.remit.files[0],fd=new FormData();
-  const isPdf=/\.pdf$/i.test(file.name)||file.type==="application/pdf";if(isPdf&&!ai.enabled){toast("PDF EOBs need local AI (APPEALS_AI=ollama)");return}
+  const isPdf=/\.pdf$/i.test(file.name)||file.type==="application/pdf",canRun=!isPdf||ai.enabled;
   fd.append(isPdf?"eob":"remit",file);fd.append("note",f.note.value);if(f.auth_number.value)fd.append("auth_number",f.auth_number.value);fd.append("proof_of_timely_filing",f.proof_of_timely_filing.checked?"true":"false");
-  const b=$("#upSubmit");b.disabled=true;b.textContent=isPdf?"Extracting…":"Triaging…";let mote=null;
-  if(isPdf){$("#upMote").hidden=false;mote=gyreMote($("#upMoteEl"),{size:44,state:"searching",label:"Reading claim fields from the PDF…",showLabel:true})}
-  try{const r=await(isPdf?withAI(()=>api("/api/eobs",{method:"POST",body:fd})):api("/api/denials",{method:"POST",body:fd}));mote?.set("done","Extracted");$("#dlg").close();f.reset();toast(`Triaged ${r.ids.length} claim(s)`);await refresh();if(r.ids[0])openDetail(r.ids[0])}
-  catch(err){toast("Upload failed: "+err.message)}finally{b.disabled=false;b.textContent="Triage";mote?.destroy();$("#upMote").hidden=true}});
+  const b=$("#upSubmit"),cancel=f.querySelector('button[value="cancel"]');b.disabled=cancel.disabled=true;b.textContent="Analyzing…";
+  const first=isPdf&&ai.enabled?"Reading claim fields from the PDF…":"Analyzing denial…";
+  $("#upMote").hidden=false;const mote=gyreMote($("#upMoteEl"),{size:56,state:"searching",label:first,showLabel:true});
+  const phase=setTimeout(()=>mote.set("thinking","Checking payer rules, deadlines and evidence…"),UPLOAD_MIN_MS/2);
+  const wait=new Promise(r=>setTimeout(r,UPLOAD_MIN_MS));
+  const req=canRun?(isPdf?withAI(()=>api("/api/eobs",{method:"POST",body:fd})):api("/api/denials",{method:"POST",body:fd})).then(r=>({r}),err=>({err})):Promise.resolve({err:new Error("PDF EOBs need the local model (APPEALS_AI=ollama)")});
+  const[{r,err}]=await Promise.all([req,wait]);clearTimeout(phase);
+  try{if(err)throw err;mote.set("done","Done");await new Promise(x=>setTimeout(x,600));$("#dlg").close();f.reset();toast(`Triaged ${r.ids.length} claim(s)`);await refresh();if(r.ids[0])openDetail(r.ids[0])}
+  catch(e2){toast("Upload failed: "+e2.message)}finally{b.disabled=cancel.disabled=false;b.textContent="Triage";mote.destroy();$("#upMote").hidden=true}});
 renderToggle();
 setTab(location.hash.replace("#/",""));
 Promise.all([loadAi(),refresh()]).catch(e=>toast(e.message));
