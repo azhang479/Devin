@@ -1,6 +1,8 @@
-# Appeals Copilot
+# Stella
 
-Appeals Copilot helps a fictional healthcare practice organize synthetic insurance
+*Your Denial Evaluation & Value Intelligence Navigator*
+
+Stella helps a fictional healthcare practice organize synthetic insurance
 claim denials, identify a next step, and draft a reviewable appeal letter. Denials
 are classified from remittance adjustment codes, then matched against versioned
 fictional payer policies and clinical-note evidence so staff can prioritize the
