@@ -3,296 +3,183 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Appeals Copilot</title>
+<title>Appeals Copilot · Board</title>
 <style>
-  :root { --bg:#f6f7fb; --card:#fff; --ink:#1d2433; --muted:#6b7385; --line:#e4e7ef; --accent:#3b5bdb;
-          --appeal:#2f9e44; --resubmit:#1c7ed6; --gather:#f08c00; --write_off:#868e96; --bill:#ae3ec9; --danger:#e03131; }
-  * { box-sizing:border-box; }
-  body { margin:0; font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); }
-  header { background:#111a2e; color:#fff; padding:14px 24px; display:flex; align-items:center; gap:14px; }
-  header h1 { font-size:18px; margin:0; font-weight:650; }
-  header .tag { font-size:11px; background:#ffffff22; padding:2px 8px; border-radius:10px; }
-  header .spacer { flex:1; }
-  header button { background:var(--accent); color:#fff; border:0; padding:7px 14px; border-radius:6px; cursor:pointer; font-weight:600; }
-  main { padding:18px 24px; display:grid; grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); gap:18px; }
-  .stats { grid-column:1/-1; display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-  .stat { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
-  .stat .k { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
-  .stat .v { font-size:22px; font-weight:700; margin-top:2px; }
-  .stat .s { color:var(--muted); font-size:12px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
-  .card h2 { font-size:14px; margin:0; padding:12px 14px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:8px; }
-  .card h2 .muted { font-weight:400; }
-  .filters { margin-left:auto; display:flex; gap:6px; }
-  .filters select { font-size:12px; padding:3px 6px; border:1px solid var(--line); border-radius:5px; }
-  table { width:100%; border-collapse:collapse; }
-  th, td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); white-space:nowrap; }
-  th { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; background:#fafbfd; position:sticky; top:0; }
-  td.num, th.num { text-align:right; }
-  tbody tr { cursor:pointer; }
-  tbody tr:hover { background:#f3f6ff; }
-  tbody tr.sel { background:#e7edff; }
-  .queue-wrap { max-height:calc(100vh - 230px); overflow:auto; }
-  .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:650; color:#fff; }
-  .a-appeal{background:var(--appeal)} .a-resubmit{background:var(--resubmit)} .a-gather_documentation{background:var(--gather)}
-  .a-write_off{background:var(--write_off)} .a-bill_patient{background:var(--bill)}
-  .st-approved { color:var(--appeal); font-weight:650; }
-  .late { color:var(--danger); font-weight:650; }
-  .soon { color:var(--gather); font-weight:650; }
-  .muted { color:var(--muted); }
-  .detail { padding:14px; max-height:calc(100vh - 230px); overflow:auto; }
-  .detail .empty { color:var(--muted); padding:40px 0; text-align:center; }
-  .kv { display:grid; grid-template-columns:130px 1fr; gap:4px 10px; margin-bottom:12px; }
-  .kv div:nth-child(odd) { color:var(--muted); }
-  .reason { background:#f8f9fc; border-left:3px solid var(--accent); padding:8px 10px; margin:8px 0 12px; border-radius:4px; }
-  h3 { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:14px 0 6px; }
-  ul.ev { margin:0; padding-left:0; list-style:none; }
-  ul.ev li { padding:5px 8px; border-radius:5px; margin-bottom:4px; }
-  ul.ev li.ok { background:#ebfbee; } ul.ev li.no { background:#fff4e6; }
-  ul.ev .snip { display:block; font-size:12px; color:var(--muted); font-style:italic; }
-  pre.letter, pre.note { white-space:pre-wrap; background:#fbfbfd; border:1px solid var(--line); border-radius:6px; padding:12px; font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; margin:0; }
-  pre.note { font-family:inherit; font-size:13px; }
-  .actions { display:flex; gap:8px; margin:10px 0; }
-  .btn { border:1px solid var(--line); background:#fff; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600; }
-  .btn.primary { background:var(--appeal); border-color:var(--appeal); color:#fff; }
-  .btn:disabled { opacity:.5; cursor:default; }
-  .bar { height:6px; background:#edf0f5; border-radius:3px; width:36px; display:inline-block; vertical-align:middle; margin-left:6px; }
-  .bar i { display:block; height:100%; background:var(--appeal); border-radius:3px; }
-  dialog { border:0; border-radius:10px; padding:0; width:520px; box-shadow:0 20px 60px #0004; }
-  dialog form { padding:18px; display:grid; gap:10px; }
-  dialog h2 { margin:0; font-size:16px; }
-  dialog label { font-size:12px; color:var(--muted); display:grid; gap:4px; }
-  dialog textarea { min-height:110px; font:13px/1.4 inherit; padding:8px; border:1px solid var(--line); border-radius:6px; }
-  dialog input[type=text] { padding:6px 8px; border:1px solid var(--line); border-radius:6px; }
-  .row { display:flex; gap:8px; justify-content:flex-end; }
-  .toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:#111a2e; color:#fff; padding:8px 16px; border-radius:6px; opacity:0; transition:opacity .2s; }
-  .toast.show { opacity:1; }
-  footer { padding:0 24px 18px; color:var(--muted); font-size:12px; }
-  .ai-pill { font-size:12px; padding:3px 10px; border-radius:12px; background:#ffffff14; display:flex; align-items:center; gap:6px; }
-  .ai-pill i { width:8px; height:8px; border-radius:50%; background:#868e96; display:inline-block; }
-  .ai-pill.on i { background:#51cf66; } .ai-pill.down i { background:#ff922b; }
-  .chip { display:inline-block; font-size:10.5px; font-weight:650; padding:1px 6px; border-radius:8px; border:1px solid var(--line); color:var(--muted); background:#fff; margin-left:4px; vertical-align:middle; }
-  .chip.ai { color:#5f3dc4; border-color:#d0bfff; background:#f3f0ff; }
-  .chip.warn { color:#d9480f; border-color:#ffd8a8; background:#fff4e6; }
-  .sechead { display:flex; align-items:center; gap:8px; margin:14px 0 6px; }
-  .sechead h3 { margin:0; }
-  .sechead .btn { margin-left:auto; padding:3px 10px; font-size:12px; }
-  .btn.ai { background:#7048e8; border-color:#7048e8; color:#fff; }
-  .notice { font-size:12px; color:var(--muted); margin:4px 0 8px; }
-  .notice.warn { color:#d9480f; }
-  pre.docreq { white-space:pre-wrap; background:#fff9db; border:1px solid #ffe066; border-radius:6px; padding:10px 12px; font-family:inherit; font-size:13px; line-height:1.45; margin:0; }
+:root{--bg:#f4f1ec;--card:#fff;--ink:#1f2328;--muted:#6b6f76;--line:#e6e1d8;--brand:#0f766e;
+--appeal:#16a34a;--resubmit:#2563eb;--gather_documentation:#d97706;--bill_patient:#db2777;--write_off:#64748b}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 "Inter",-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:16px;padding:14px 24px;background:var(--card);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:750;font-size:17px}
+.brand span{width:28px;height:28px;border-radius:50%;background:conic-gradient(var(--appeal) 0 35%,var(--resubmit) 0 66%,var(--gather_documentation) 0 80%,var(--bill_patient) 0 88%,var(--write_off) 0);box-shadow:inset 0 0 0 7px #fff}
+.tag{font-size:11.5px;color:var(--muted);border:1px solid var(--line);padding:3px 9px;border-radius:20px}
+.sp{flex:1}
+.stat{display:flex;flex-direction:column;align-items:flex-end;padding:0 14px;border-left:1px solid var(--line)}
+.stat b{font-size:17px;font-variant-numeric:tabular-nums}.stat small{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.ai{font-size:12px;display:flex;align-items:center;gap:6px;color:var(--muted)}
+.ai i{width:8px;height:8px;border-radius:50%;background:#bbb}.ai.on i{background:var(--appeal)}.ai.down i{background:var(--gather_documentation)}
+.btn{font:inherit;font-weight:600;font-size:13px;border:1px solid var(--line);background:#fff;padding:7px 13px;border-radius:9px;cursor:pointer;color:var(--ink)}
+.btn:hover{border-color:#bdb6a8}.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}.btn.ok{background:var(--appeal);color:#fff;border-color:var(--appeal)}.btn:disabled{opacity:.55;cursor:default}
+.bar{display:flex;gap:10px;align-items:center;padding:12px 24px}
+.bar input,.bar select{font:inherit;font-size:13px;padding:7px 11px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.bar input{width:260px}
+.seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:none;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--muted)}.seg button.on{background:var(--ink);color:#fff}
+.board{flex:1;display:grid;grid-template-columns:repeat(5,minmax(240px,1fr));gap:14px;padding:4px 24px 20px;overflow-x:auto;min-height:0}
+.col{background:#ebe6dd;border-radius:14px;display:flex;flex-direction:column;min-height:0;transition:background .15s}
+.col.over{background:#e2ddd2;outline:2px dashed var(--c)}
+.colh{padding:12px 14px 8px;display:flex;align-items:center;gap:8px;border-top:4px solid var(--c);border-radius:14px 14px 0 0}
+.colh b{text-transform:capitalize}.colh .n{background:#fff;border-radius:10px;padding:0 8px;font-size:12px;color:var(--muted)}
+.colh .sum{margin-left:auto;font-weight:650;font-variant-numeric:tabular-nums;font-size:13px}
+.colsub{padding:0 14px 8px;font-size:11.5px;color:var(--muted)}
+.cards{flex:1;overflow-y:auto;padding:4px 10px 14px;display:flex;flex-direction:column;gap:9px}
+.card{background:var(--card);border-radius:11px;padding:11px 12px;box-shadow:0 1px 2px #0000000d,0 1px 0 #0000000a;cursor:pointer;border:1px solid transparent;transition:transform .12s,box-shadow .12s,border-color .12s;position:relative;animation:pop .25s ease both}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 18px #0000001a}
+.card.sel{border-color:var(--c)}
+.card .top{display:flex;align-items:center;gap:6px}
+.card .name{font-weight:650;font-size:13.5px}
+.card .amt{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums}
+.card .meta{color:var(--muted);font-size:12px;margin-top:3px}
+.card .foot{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:11.5px}
+.rank{position:absolute;right:10px;top:-8px;background:var(--c);color:#fff;font-size:10px;font-weight:700;border-radius:6px;padding:1px 5px}
+.dl{padding:2px 7px;border-radius:6px;background:#f1efe9;color:var(--muted);font-weight:600}
+.dl.soon{background:#fef3c7;color:#92400e}.dl.late{background:#fee2e2;color:#b91c1c}
+.chip{font-size:10.5px;padding:1px 7px;border-radius:6px;background:#f1efe9;color:var(--muted);font-weight:600}
+.chip.ai{background:#ede9fe;color:#6d28d9}.chip.warn{background:#ffedd5;color:#9a3412}.chip.ok{background:#dcfce7;color:#166534}
+.prio{margin-left:auto;display:flex;gap:2px}.prio i{width:5px;height:12px;border-radius:2px;background:#e5e1d8}.prio i.f{background:var(--c)}
+.empty{color:var(--muted);font-size:12.5px;text-align:center;padding:24px 8px;border:1.5px dashed #d6d0c4;border-radius:10px}
+.scrim{position:fixed;inset:0;background:#1f232833;opacity:0;pointer-events:none;transition:.2s;z-index:10}.scrim.show{opacity:1;pointer-events:auto}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:min(600px,96vw);background:#fff;z-index:11;transform:translateX(102%);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;box-shadow:-20px 0 50px #0002}
+.drawer.open{transform:none}
+.dh{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:flex-start;border-top:5px solid var(--c)}
+.dh h2{margin:0;font-size:18px}.dh .sub{color:var(--muted);font-size:12.5px}
+.db{padding:16px 20px 40px;overflow:auto}
+.steps{display:flex;gap:6px;margin:4px 0 14px}.steps div{flex:1;height:5px;border-radius:3px;background:#eee}.steps div.f{background:var(--c)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+.grid>div{background:#faf8f4;border:1px solid var(--line);border-radius:10px;padding:9px 11px}.grid small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em}.grid b{font-size:15px}
+.reason{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--c) 10%,#fff);border:1px solid color-mix(in srgb,var(--c) 30%,#fff)}
+h3{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:20px 0 8px;display:flex;gap:8px;align-items:center}
+h3 .btn{margin-left:auto;padding:4px 10px;font-size:12px}
+ul.ev{list-style:none;padding:0;margin:0;display:grid;gap:7px}
+ul.ev li{border-radius:10px;padding:9px 11px;border:1px solid}
+ul.ev li.y{background:#f0fdf4;border-color:#bbf7d0}ul.ev li.n{background:#fffbeb;border-color:#fde68a}
+ul.ev q{display:block;color:var(--muted);font-size:12.5px;font-style:italic;margin-top:2px}
+.note{background:#faf8f4;border:1px solid var(--line);border-radius:10px;padding:11px 13px;white-space:pre-wrap}
+.doc{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:11px 13px;white-space:pre-wrap}
+pre.letter{white-space:pre-wrap;background:#fbfaf7;border:1px solid var(--line);border-radius:10px;padding:14px;font:12.5px/1.55 ui-monospace,Menlo,monospace;margin:0}
+.warn{color:#9a3412;font-size:12.5px}.muted{color:var(--muted)}
+dialog{border:0;border-radius:16px;padding:0;width:520px;box-shadow:0 30px 80px #0004}dialog::backdrop{background:#1f232855}
+dialog form{padding:20px;display:grid;gap:11px}dialog label{display:grid;gap:4px;font-size:12.5px;color:var(--muted)}
+dialog textarea,dialog input[type=text]{font:inherit;border:1px solid var(--line);border-radius:9px;padding:8px}dialog textarea{min-height:110px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center}.drop.over{border-color:var(--brand);background:#f0fdfa}
+.row{display:flex;gap:8px;justify-content:flex-end}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:9px 16px;border-radius:10px;opacity:0;transition:.2s;z-index:30}.toast.show{opacity:1;transform:translateX(-50%)}
+footer{padding:0 24px 10px;color:var(--muted);font-size:11.5px}
 </style>
 </head>
 <body>
 <header>
-  <h1>Appeals Copilot</h1>
-  <span class="tag">Synthetic data · decision support only</span>
-  <span class="spacer"></span>
-  <span class="ai-pill" id="aiPill" title="Local LLM status"><i></i><span>AI off</span></span>
-  <button id="uploadBtn">Upload denial</button>
+  <div class="brand"><span></span>Appeals Board</div><span class="tag">Synthetic data · decision support only</span>
+  <span class="sp"></span>
+  <div class="stat"><b id="sStake">–</b><small>at stake</small></div>
+  <div class="stat"><b id="sPursue">–</b><small>worth pursuing</small></div>
+  <div class="stat"><b id="sExp" style="color:var(--appeal)">–</b><small>expected recovery</small></div>
+  <span class="ai" id="aiPill"><i></i><span>AI off</span></span>
+  <button class="btn primary" id="uploadBtn">+ New denial</button>
 </header>
-<main>
-  <section class="stats" id="stats"></section>
-  <section class="card">
-    <h2>Work queue <span class="muted" id="qcount"></span>
-      <span class="filters">
-        <select id="fAction"><option value="">All actions</option></select>
-        <select id="fPayer"><option value="">All payers</option></select>
-      </span>
-    </h2>
-    <div class="queue-wrap">
-      <table>
-        <thead><tr>
-          <th>Patient</th><th>Payer</th><th>CPT</th><th>Denial</th><th>Action</th>
-          <th class="num">At stake</th><th class="num">Days left</th><th>Win</th><th class="num">Priority</th>
-        </tr></thead>
-        <tbody id="queue"></tbody>
-      </table>
-    </div>
-  </section>
-  <section class="card">
-    <h2 id="dTitle">Denial detail</h2>
-    <div class="detail" id="detail"><div class="empty">Select a denial from the queue.</div></div>
-  </section>
-</main>
-<footer>All payers, policies, and patients are fictional. A clinician or biller reviews and approves every letter before submission.</footer>
+<div class="bar">
+  <input id="search" placeholder="Search patient, CPT, denial code…">
+  <select id="fPayer"><option value="">All payers</option></select>
+  <div class="seg" id="sortSeg"><button data-s="priority" class="on">Priority</button><button data-s="days_left">Deadline</button><button data-s="amount_at_stake">Amount</button></div>
+  <span class="sp"></span><span class="muted" style="font-size:12px">Click or drag a card to open it · #1–#3 = top priority in each column</span>
+</div>
+<div class="board" id="board"></div>
+<footer>All payers, policies, and patients are fictional. A clinician or biller reviews and approves every letter before submission. Columns reflect the deterministic triage decision; AI never changes amounts or deadlines.</footer>
 
-<dialog id="dlg">
-  <form method="dialog" id="upForm">
-    <h2>Upload a denial</h2>
-    <label>835 remittance, or a PDF EOB (PDFs need local AI) <input type="file" name="remit" accept=".835,.txt,.edi,.pdf,application/pdf" required></label>
-    <label>Clinical note <textarea name="note" placeholder="Paste the relevant clinical note…"></textarea></label>
-    <label>Authorization number (optional) <input type="text" name="auth_number"></label>
-    <label style="display:flex;align-items:center;gap:6px;color:var(--ink)"><input type="checkbox" name="proof_of_timely_filing"> Proof of timely filing on file</label>
-    <div class="row"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn primary" id="upSubmit" value="ok">Triage</button></div>
-  </form>
-</dialog>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer"><div class="dh" id="dh"></div><div class="db" id="db"></div></aside>
+<dialog id="dlg"><form method="dialog" id="upForm">
+  <h2 style="margin:0;font-size:17px">New denial</h2>
+  <label class="drop" id="drop">Drop an 835 remittance or PDF EOB<input type="file" name="remit" accept=".835,.txt,.edi,.pdf" required style="margin-top:8px"></label>
+  <label>Clinical note <textarea name="note" placeholder="Paste the relevant clinical note…"></textarea></label>
+  <label>Authorization number (optional) <input type="text" name="auth_number"></label>
+  <label style="display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" name="proof_of_timely_filing"> Proof of timely filing on file</label>
+  <div class="row"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn primary" id="upSubmit" value="ok">Triage</button></div>
+</form></dialog>
 <div class="toast" id="toast"></div>
 
 <script>
-const $ = s => document.querySelector(s);
-const money = n => (n ?? 0).toLocaleString("en-US", {style:"currency", currency:"USD", maximumFractionDigits:0});
-const pct = n => Math.round((n ?? 0) * 100) + "%";
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const label = a => String(a || "").replace(/_/g, " ");
-let queue = [], selected = null, ai = {enabled:false, model:null, reachable:false};
-const methodChip = m => m === "ai" ? '<span class="chip ai" title="Evidence matched by the local LLM; quotes verified against the note">AI</span>'
-  : m === "keyword_fallback" ? '<span class="chip warn" title="AI failed; keyword matching used">AI failed</span>' : "";
-const sourceChip = s => s === "eob_pdf" ? '<span class="chip" title="Extracted from a PDF EOB by the local LLM">PDF</span>' : "";
-
-async function loadAiStatus() {
-  try { ai = await api("/api/ai/status"); } catch { ai = {enabled:false}; }
-  const pill = $("#aiPill");
-  pill.className = "ai-pill" + (ai.enabled ? (ai.reachable ? " on" : " down") : "");
-  pill.querySelector("span").textContent = ai.enabled ? `Local AI: ${ai.model}${ai.reachable ? "" : " (unreachable)"}` : "AI off";
+const $=s=>document.querySelector(s);
+const money=n=>(n??0).toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0});
+const pct=n=>Math.round((n??0)*100)+"%";
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const label=a=>String(a||"").replace(/_/g," ");
+const COLS=[["appeal","Appeal","Formal appeal with letter"],["resubmit","Resubmit","Fix and send a corrected claim"],["gather_documentation","Gather docs","Ask the clinician for documentation"],["bill_patient","Bill patient","Patient responsibility or coverage"],["write_off","Write off","Not recoverable"]];
+const shortPayer=p=>String(p||"").replace(/ \(synthetic\)$/,"");
+let queue=[],ai={enabled:false},selected=null,sortKey="priority",q="",payer="";
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2400)}
+async function api(path,opts){const r=await fetch(path,opts);if(!r.ok){let msg=String(r.status);try{const b=await r.json();const d=b.detail;msg=typeof d==="string"?d:d?.errors?d.errors.join("; "):JSON.stringify(d)}catch{}throw new Error(msg)}return r.headers.get("content-type")?.includes("json")?r.json():r.text()}
+async function loadAi(){try{ai=await api("/api/ai/status")}catch{ai={enabled:false}}const p=$("#aiPill");p.className="ai"+(ai.enabled?(ai.reachable?" on":" down"):"");p.querySelector("span").textContent=ai.enabled?`Local AI · ${ai.model}`:"AI off"}
+function passes(x){const s=q.toLowerCase();return(!payer||x.payer_name===payer)&&(!s||[x.patient,x.cpt,x.carc,x.category,x.payer_name,x.id].join(" ").toLowerCase().includes(s))}
+function render(){
+  const maxP=Math.max(...queue.map(x=>x.priority||0),1);
+  $("#board").innerHTML=COLS.map(([a,name,sub])=>{
+    const rows=queue.filter(x=>x.action===a&&passes(x)).sort((x,y)=>sortKey==="days_left"?x.days_left-y.days_left:y[sortKey]-x[sortKey]);
+    const sum=rows.reduce((s,x)=>s+x.amount_at_stake,0);
+    return `<section class="col" data-col="${a}" style="--c:var(--${a})"><div class="colh"><b>${name}</b><span class="n">${rows.length}</span><span class="sum">${money(sum)}</span></div><div class="colsub">${sub}</div>
+    <div class="cards">${rows.map((x,i)=>{const dl=x.days_left,bars=Math.ceil((x.priority||0)/maxP*5);return `<article class="card ${x.id===selected?"sel":""}" draggable="true" data-id="${esc(x.id)}" style="--c:var(--${a});animation-delay:${i*25}ms">
+      ${i<3&&x.priority>0?`<span class="rank">#${i+1}</span>`:""}
+      <div class="top"><span class="name">${esc(x.patient)}</span><span class="amt">${money(x.amount_at_stake)}</span></div>
+      <div class="meta">${esc(shortPayer(x.payer_name))} · CPT ${esc(x.cpt)} · ${esc(x.carc)} ${esc(label(x.category))}</div>
+      <div class="foot"><span class="dl ${dl<0?"late":dl<=14?"soon":""}">${dl<0?"deadline passed":dl+"d left"}</span>${x.win_probability?`<span class="chip">${pct(x.win_probability)} win</span>`:""}${x.analysis_method==="ai"?'<span class="chip ai">AI</span>':x.analysis_method==="keyword_fallback"?'<span class="chip warn">AI failed</span>':""}${x.source==="eob_pdf"?'<span class="chip">PDF</span>':""}${x.status==="approved"?'<span class="chip ok">approved</span>':""}
+      <span class="prio" title="priority ${Math.round(x.priority||0)}">${[1,2,3,4,5].map(k=>`<i class="${k<=bars?"f":""}"></i>`).join("")}</span></div></article>`}).join("")||'<div class="empty">Nothing here</div>'}</div></section>`}).join("");
 }
-
-function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2200); }
-async function api(path, opts) {
-  const r = await fetch(path, opts);
-  if (!r.ok) {
-    let msg = String(r.status);
-    try { const b = await r.json(); const det = b.detail; msg = typeof det === "string" ? det : det?.errors ? det.errors.join("; ") : JSON.stringify(det); } catch {}
-    throw new Error(msg);
-  }
-  return r.headers.get("content-type")?.includes("json") ? r.json() : r.text();
+function evidence(t,d){const ev=t.evidence||{},m=ev.matched||[],x=ev.missing_details||[];if(!m.length&&!x.length)return '<p class="muted">No policy criteria apply to this denial type.</p>';
+  return `<ul class="ev">${m.map(i=>`<li class="y">✓ <b>${esc(i.description)}</b><q>${esc(i.snippet)}</q></li>`).join("")}${x.map(i=>`<li class="n">✗ <b>${esc(i.description)}</b></li>`).join("")}</ul><p class="muted" style="font-size:12.5px">${ev.meets_min?"Meets":"Does not meet"} the policy's minimum criteria.</p>${(ev.rejected_quotes||[]).length?`<p class="warn">${ev.rejected_quotes.length} AI quote(s) discarded: not found word for word in the note.</p>`:""}`}
+async function openDetail(id){
+  selected=id;render();const d=await api(`/api/denials/${encodeURIComponent(id)}`),t=d.triage,c=d.denial,a=t.action;
+  const drawer=$("#drawer");drawer.style.setProperty("--c",`var(--${a})`);
+  const stage=d.status==="approved"?4:d.letter?3:d.doc_request?2:1;
+  $("#dh").innerHTML=`<div style="flex:1"><div class="sub">${esc(label(a))} · ${esc(t.carc)} ${esc(label(t.category))}</div><h2>${esc(c.patient_name)}</h2><div class="sub">claim ${esc(c.claim_id)} · ${esc(d.payer?.name)}</div></div><button class="btn" id="closeD">✕</button>`;
+  const mn=t.category==="medical_necessity";
+  $("#db").innerHTML=`<div class="steps" title="triaged → evidence → letter → approved">${[1,2,3,4].map(k=>`<div class="${k<=stage?"f":""}"></div>`).join("")}</div>
+   <div class="reason">${esc(t.reason)}</div>
+   <div class="grid"><div><small>At stake</small><b>${money(t.amount_at_stake)}</b></div><div><small>Deadline</small><b>${t.days_left<0?"passed":t.days_left+" days"}</b><div class="muted" style="font-size:11.5px">${esc(t.deadline)}</div></div><div><small>Win probability</small><b>${t.win_probability?pct(t.win_probability):"—"}</b></div></div>
+   <div class="muted" style="font-size:12.5px">Billed ${money(c.billed)} · paid ${money(c.paid)} · policy ${esc(t.policy_id||"—")} · ${d.source==="eob_pdf"?'<span class="chip ai">PDF EOB, AI-extracted: check fields against the PDF</span>':"835 remittance"}</div>
+   <h3>Evidence ${(t.evidence?.matched?.length||t.evidence?.missing?.length)?(d.analysis_method==="ai"?'<span class="chip ai">AI · quotes verified</span>':'<span class="chip">keyword</span>'):""}${ai.enabled&&mn?`<button class="btn" id="aiBtn">${d.analysis_method==="ai"?"Re-run AI":"✦ Run AI review"}</button>`:""}</h3>
+   ${d.analysis_method==="keyword_fallback"?`<p class="warn">AI review failed (${esc(d.ai_error)}); showing keyword matches.</p>`:""}${evidence(t,d)}
+   ${d.doc_request?`<h3>Request to clinician ${d.doc_request_method==="ai"?'<span class="chip ai">AI drafted</span>':'<span class="chip">template</span>'}<button class="btn" id="copyDoc">Copy</button></h3><div class="doc">${esc(d.doc_request)}</div>`:""}
+   <h3>Clinical note</h3><div class="note">${esc(d.note_text)}</div>
+   ${d.letter?`<h3>Draft appeal letter ${d.ai_argument?'<span class="chip ai">AI argument</span>':""}</h3><div style="display:flex;gap:8px;margin-bottom:8px"><button class="btn ok" id="approveBtn" ${d.status==="approved"?"disabled":""}>${d.status==="approved"?"Approved ✓":"Approve letter"}</button><a class="btn" style="text-decoration:none" href="/api/denials/${encodeURIComponent(id)}/letter.txt" download="appeal-${esc(id)}.txt">Download .txt</a></div><pre class="letter">${esc(d.letter)}</pre>`:""}`;
+  drawer.classList.add("open");$("#scrim").classList.add("show");
+  $("#closeD").onclick=closeDetail;
+  const ab=$("#approveBtn");if(ab)ab.onclick=async()=>{await api(`/api/denials/${encodeURIComponent(id)}/approve`,{method:"POST"});toast("Letter approved");await refresh();openDetail(id)};
+  const cb=$("#copyDoc");if(cb)cb.onclick=async()=>{await navigator.clipboard.writeText(d.doc_request);toast("Copied")};
+  const aib=$("#aiBtn");if(aib)aib.onclick=async()=>{aib.disabled=true;aib.textContent="Running local model…";try{await api(`/api/denials/${encodeURIComponent(id)}/ai-review`,{method:"POST"});toast("AI review complete");await refresh()}catch(e){toast("AI review failed: "+e.message)}openDetail(id)};
 }
-
-async function loadStats() {
-  const s = await api("/api/stats");
-  const by = s.count_by_action || s.by_action || {};
-  const total = s.total_count ?? Object.values(by).reduce((a, b) => a + b, 0);
-  const recoverable = s.appeal_and_resubmit_amount ?? s.total_recoverable ?? s.total_in_appeal_resubmit ?? s.recoverable ?? 0;
-  $("#stats").innerHTML = `
-    <div class="stat"><div class="k">Denials</div><div class="v">${total}</div><div class="s">${by.appeal || 0} appeal · ${by.resubmit || 0} resubmit</div></div>
-    <div class="stat"><div class="k">Total at stake</div><div class="v">${money(s.total_amount_at_stake ?? s.total_at_stake)}</div><div class="s">billed − paid</div></div>
-    <div class="stat"><div class="k">Worth pursuing</div><div class="v">${money(recoverable)}</div><div class="s">in appeal + resubmit</div></div>
-    <div class="stat"><div class="k">Expected recovery</div><div class="v" style="color:var(--appeal)">${money(s.expected_recovery)}</div><div class="s">Σ amount × win probability</div></div>`;
-}
-
-function fillFilters() {
-  const fill = (sel, vals) => { const cur = sel.value; sel.length = 1; [...new Set(vals)].sort().forEach(v => sel.add(new Option(label(v), v))); sel.value = cur; };
-  fill($("#fAction"), queue.map(q => q.action));
-  fill($("#fPayer"), queue.map(q => q.payer_name || q.payer));
-}
-
-function renderQueue() {
-  const fa = $("#fAction").value, fp = $("#fPayer").value;
-  const rows = queue.filter(q => (!fa || q.action === fa) && (!fp || (q.payer_name || q.payer) === fp));
-  $("#qcount").textContent = `· ${rows.length}`;
-  $("#queue").innerHTML = rows.map(q => {
-    const dl = q.days_left;
-    const dcls = dl < 0 ? "late" : dl <= 14 ? "soon" : "";
-    const win = q.win_probability || 0;
-    return `<tr data-id="${esc(q.id)}" class="${q.id === selected ? "sel" : ""}">
-      <td>${esc(q.patient)}${q.status === "approved" ? ' <span class="st-approved">✓</span>' : ""}</td>
-      <td>${esc((q.payer_name || q.payer || "").replace(/ \(synthetic\)$/, ""))}</td><td>${esc(q.cpt)}</td>
-      <td><span title="${esc(q.category)}">${esc(q.carc)}</span> <span class="muted">${esc(label(q.category))}</span></td>
-      <td><span class="badge a-${esc(q.action)}">${esc(label(q.action))}</span>${methodChip(q.analysis_method)}${sourceChip(q.source)}</td>
-      <td class="num">${money(q.amount_at_stake)}</td>
-      <td class="num ${dcls}">${dl < 0 ? "passed" : dl}</td>
-      <td>${win ? pct(win) + `<span class="bar"><i style="width:${win * 100}%"></i></span>` : '<span class="muted">—</span>'}</td>
-      <td class="num">${Math.round(q.priority || 0).toLocaleString()}</td></tr>`;
-  }).join("");
-}
-
-async function loadQueue() { queue = await api("/api/queue"); fillFilters(); renderQueue(); }
-
-function evidenceList(ev) {
-  if (!ev) return '<p class="muted">No policy criteria apply to this denial type.</p>';
-  const item = (m, ok) => {
-    const id = typeof m === "string" ? m : (m.id || m.criterion_id);
-    const desc = typeof m === "string" ? "" : (m.description || "");
-    const snip = typeof m === "string" ? "" : (m.snippet || "");
-    return `<li class="${ok ? "ok" : "no"}">${ok ? "✓" : "✗"} <b>${esc(desc || id)}</b>${snip ? `<span class="snip">“…${esc(snip)}…”</span>` : ""}</li>`;
-  };
-  const matched = ev.matched || [], missing = (ev.missing_details && ev.missing_details.length ? ev.missing_details : ev.missing) || [];
-  if (!matched.length && !missing.length) return '<p class="muted">No policy criteria apply to this denial type.</p>';
-  const rejected = ev.rejected_quotes || [];
-  return `<ul class="ev">${matched.map(m => item(m, true)).join("")}${missing.map(m => item(m, false)).join("")}</ul>
-    <p class="muted" style="margin:6px 0 0">${ev.meets_min ? "Meets" : "Does not meet"} the policy's minimum criteria.</p>
-    ${rejected.length ? `<p class="notice warn" title="${esc(rejected.join(" | "))}">${rejected.length} AI quote${rejected.length === 1 ? " was" : "s were"} discarded because ${rejected.length === 1 ? "it isn't" : "they aren't"} in the note word for word.</p>` : ""}`;
-}
-
-function evidenceMethod(d, t) {
-  if (!(t.evidence?.matched?.length || t.evidence?.missing?.length)) return "";
-  return d.analysis_method === "ai" ? '<span class="chip ai">AI · quotes verified</span>' : '<span class="chip">keyword match</span>';
-}
-
-async function showDetail(id) {
-  selected = id; renderQueue();
-  const d = await api(`/api/denials/${encodeURIComponent(id)}`);
-  const t = d.triage || d;
-  const claim = d.claim || d.denial || d;
-  const patient = claim.patient || claim.patient_name || d.patient || "";
-  $("#dTitle").innerHTML = `${esc(patient)} <span class="muted">· claim ${esc(claim.claim_id || d.claim_id || id)}</span>`;
-  const approved = d.status === "approved";
-  $("#detail").innerHTML = `
-    <div><span class="badge a-${esc(t.action)}">${esc(label(t.action))}</span> <span class="muted">${esc(t.carc)} · ${esc(label(t.category))}</span></div>
-    <div class="reason">${esc(t.reason)}</div>
-    <div class="kv">
-      <div>Payer</div><div>${esc(d.payer?.name || d.payer_name || claim.payer_name || claim.payer_id || "")}</div>
-      <div>Amount at stake</div><div>${money(t.amount_at_stake)}</div>
-      <div>Appeal deadline</div><div>${esc(t.deadline)} <span class="${t.days_left < 0 ? "late" : t.days_left <= 14 ? "soon" : "muted"}">(${t.days_left < 0 ? "passed" : t.days_left + " days left"})</span></div>
-      <div>Win probability</div><div>${t.win_probability ? pct(t.win_probability) : "—"}</div>
-      <div>Policy</div><div>${esc(t.policy_id || "—")}</div>
-      <div>Source</div><div>${d.source === "eob_pdf" ? 'PDF EOB <span class="chip ai">AI-extracted</span> <span class="muted">check the fields against the PDF</span>' : "835 remittance"}</div>
-    </div>
-    <div class="sechead"><h3>Policy criteria vs. clinical note</h3>${evidenceMethod(d, t)}
-      ${ai.enabled && t.category === "medical_necessity" ? `<button class="btn ai" id="aiBtn">${d.analysis_method === "ai" ? "Re-run AI review" : "Run AI review"}</button>` : ""}</div>
-    ${d.analysis_method === "keyword_fallback" ? `<p class="notice warn">AI review failed (${esc(d.ai_error || "error")}); showing keyword matches.</p>` : ""}
-    ${evidenceList(t.evidence)}
-    ${d.doc_request ? `<div class="sechead"><h3>Documentation request to clinician</h3>${d.doc_request_method === "ai" ? '<span class="chip ai">AI drafted</span>' : '<span class="chip">template</span>'}
-      <button class="btn" id="copyDoc">Copy</button></div><pre class="docreq">${esc(d.doc_request)}</pre>` : ""}
-    <h3>Clinical note</h3><pre class="note">${esc(d.note || d.note_text || "")}</pre>
-    ${d.letter ? `<h3>Draft appeal letter</h3>
-      ${d.ai_argument ? '<p class="notice"><span class="chip ai">AI</span> Includes an AI-drafted argument paragraph. Its quotes were checked against the note; the rest still needs review.</p>' : ""}
-      <div class="actions">
-        <button class="btn primary" id="approveBtn" ${approved ? "disabled" : ""}>${approved ? "Approved ✓" : "Approve letter"}</button>
-        <a class="btn" href="/api/denials/${encodeURIComponent(id)}/letter.txt" download="appeal-${esc(id)}.txt">Download .txt</a>
-      </div><pre class="letter">${esc(d.letter)}</pre>` : ""}`;
-  const ab = $("#approveBtn");
-  const cb = $("#copyDoc");
-  if (cb) cb.onclick = async () => { await navigator.clipboard.writeText(d.doc_request); toast("Copied documentation request"); };
-  const aib = $("#aiBtn");
-  if (aib) aib.onclick = async () => {
-    aib.disabled = true; aib.textContent = "Running local model…";
-    try {
-      await api(`/api/denials/${encodeURIComponent(id)}/ai-review`, {method:"POST"});
-      toast("AI review complete");
-      await Promise.all([loadQueue(), loadStats()]);
-    } catch (err) { toast("AI review failed: " + err.message); }
-    showDetail(id);
-  };
-  if (ab) ab.onclick = async () => { await api(`/api/denials/${encodeURIComponent(id)}/approve`, {method:"POST"}); toast("Letter approved"); await loadQueue(); showDetail(id); };
-}
-
-$("#queue").addEventListener("click", e => { const tr = e.target.closest("tr[data-id]"); if (tr) showDetail(tr.dataset.id); });
-$("#fAction").onchange = renderQueue; $("#fPayer").onchange = renderQueue;
-$("#uploadBtn").onclick = () => $("#dlg").showModal();
-$("#upForm").addEventListener("submit", async e => {
-  if (e.submitter?.value !== "ok") return;
-  e.preventDefault();
-  const f = e.target, fd = new FormData(), file = f.remit.files[0];
-  const isPdf = /\.pdf$/i.test(file.name) || file.type === "application/pdf";
-  if (isPdf && !ai.enabled) { toast("PDF EOBs need local AI (set APPEALS_AI=ollama)"); return; }
-  fd.append(isPdf ? "eob" : "remit", file);
-  fd.append("note", f.note.value);
-  if (f.auth_number.value) fd.append("auth_number", f.auth_number.value);
-  fd.append("proof_of_timely_filing", f.proof_of_timely_filing.checked ? "true" : "false");
-  try {
-    $("#upSubmit").disabled = true; $("#upSubmit").textContent = isPdf ? "Extracting…" : "Triaging…";
-    const res = await api(isPdf ? "/api/eobs" : "/api/denials", {method:"POST", body:fd});
-    $("#dlg").close(); f.reset();
-    const ids = res.ids || res;
-    toast(`Triaged ${ids.length} claim${ids.length === 1 ? "" : "s"}`);
-    await Promise.all([loadQueue(), loadStats()]);
-    if (ids[0]) showDetail(ids[0]);
-  } catch (err) { toast("Upload failed: " + err.message); }
-  finally { $("#upSubmit").disabled = false; $("#upSubmit").textContent = "Triage"; }
-});
-
-Promise.all([loadAiStatus(), loadStats(), loadQueue()]).then(() => { if (queue[0]) showDetail(queue[0].id); }).catch(e => toast(e.message));
+function closeDetail(){$("#drawer").classList.remove("open");$("#scrim").classList.remove("show");selected=null;render()}
+async function refresh(){const[s,qq]=await Promise.all([api("/api/stats"),api("/api/queue")]);queue=qq;$("#sStake").textContent=money(s.total_amount_at_stake);$("#sPursue").textContent=money(s.appeal_and_resubmit_amount);$("#sExp").textContent=money(s.expected_recovery);
+  const sel=$("#fPayer"),cur=sel.value;sel.length=1;[...new Set(queue.map(x=>x.payer_name))].sort().forEach(p=>sel.add(new Option(shortPayer(p),p)));sel.value=cur;render()}
+document.addEventListener("click",e=>{const c=e.target.closest(".card");if(c)openDetail(c.dataset.id);const s=e.target.closest("#sortSeg button");if(s){sortKey=s.dataset.s;document.querySelectorAll("#sortSeg button").forEach(b=>b.classList.toggle("on",b===s));render()}});
+let dragId=null;
+document.addEventListener("dragstart",e=>{const c=e.target.closest(".card");if(c){dragId=c.dataset.id;e.dataTransfer.effectAllowed="move"}});
+document.addEventListener("dragover",e=>{const col=e.target.closest(".col");if(col&&dragId){e.preventDefault();document.querySelectorAll(".col").forEach(x=>x.classList.toggle("over",x===col))}});
+document.addEventListener("dragend",()=>document.querySelectorAll(".col").forEach(x=>x.classList.remove("over")));
+document.addEventListener("drop",e=>{const col=e.target.closest(".col");document.querySelectorAll(".col").forEach(x=>x.classList.remove("over"));if(!col||!dragId)return;e.preventDefault();const x=queue.find(r=>r.id===dragId);
+  if(x.action!==col.dataset.col)toast(`Triage says “${label(x.action)}”. Columns follow the payer rules, so open the case to review the evidence.`);openDetail(dragId);dragId=null});
+$("#search").oninput=e=>{q=e.target.value;render()};$("#fPayer").onchange=e=>{payer=e.target.value;render()};
+$("#scrim").onclick=closeDetail;document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDetail()});
+$("#uploadBtn").onclick=()=>$("#dlg").showModal();
+const drop=$("#drop");["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();drop.classList.add("over")}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();drop.classList.remove("over")}));
+drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f){const dt=new DataTransfer();dt.items.add(f);$("#upForm").remit.files=dt.files}});
+$("#upForm").addEventListener("submit",async e=>{if(e.submitter?.value!=="ok")return;e.preventDefault();const f=e.target,file=f.remit.files[0],fd=new FormData();
+  const isPdf=/\.pdf$/i.test(file.name)||file.type==="application/pdf";if(isPdf&&!ai.enabled){toast("PDF EOBs need local AI (APPEALS_AI=ollama)");return}
+  fd.append(isPdf?"eob":"remit",file);fd.append("note",f.note.value);if(f.auth_number.value)fd.append("auth_number",f.auth_number.value);fd.append("proof_of_timely_filing",f.proof_of_timely_filing.checked?"true":"false");
+  const b=$("#upSubmit");b.disabled=true;b.textContent=isPdf?"Extracting…":"Triaging…";
+  try{const r=await api(isPdf?"/api/eobs":"/api/denials",{method:"POST",body:fd});$("#dlg").close();f.reset();toast(`Triaged ${r.ids.length} claim(s)`);await refresh();if(r.ids[0])openDetail(r.ids[0])}catch(err){toast("Upload failed: "+err.message)}finally{b.disabled=false;b.textContent="Triage"}});
+Promise.all([loadAi(),refresh()]).catch(e=>toast(e.message));
 </script>
 </body>
 </html>
