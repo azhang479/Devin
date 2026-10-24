@@ -1,6 +1,6 @@
 # Stella
 
-*Your Denial Evaluation & Value Intelligence Navigator*
+*Your Denial Evaluation & Value Intelligence Navigator (DEVIN)*
 
 Stella helps a fictional healthcare practice organize synthetic insurance
 claim denials, identify a next step, and draft a reviewable appeal letter. Denials
